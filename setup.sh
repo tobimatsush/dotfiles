@@ -140,7 +140,6 @@ setup::misc() {
   install_symlink ".latexmkrc"
   install_symlink ".local/bin/rmpkg"
   install_symlink ".local/share/zsh/site-functions"
-  install_symlink ".mikutter/plugin"
   install_symlink ".tern-config"
   install_symlink ".tmux.conf"
 
