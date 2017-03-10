@@ -1,18 +1,40 @@
 #!/bin/bash
 
 DOTFILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-[[ -z "$DOTFILE_DIR" ]] && $DOTFILE_DIR=~/Library/dotfiles
+[[ -z "$DOTFILE_DIR" ]] && DOTFILE_DIR=~/Library/dotfiles
 
 main() {
-  cd "$DOTFILE_DIR"
-  git submodule init
-  git submodule update
+  local install_deps=""
+  for n in "$@"; do
+    case "$n" in
+      --install-deps)
+        install_deps=yes
+        ;;
+      *)
+        ;;
+    esac
+  done
 
-  install_shell_config
-  install_vim_config
-  install_gpg_config
-  install_misc
+  cd "$DOTFILE_DIR"
+
+  echo "$(tput bold)== Cloning submodules ==$(tput sgr0)"
+  git submodule update --init --recursive
+
+  echo "$(tput bold)== Installing configuration ==$(tput sgr0)"
+  setup::shell
+  setup::vim
+  setup::gpg
+  setup::misc
+
+  if [[ -n "$install_deps" ]]; then
+    echo "$(tput bold)== Installing dependencies ==$(tput sgr0)"
+    setup::install_deps
+  fi
 }
+
+######################
+#  helper functions  #
+######################
 
 abort() {
   [[ -n "$1" ]] && echo "$1" >&2
@@ -57,7 +79,11 @@ install_symlink() {
   cd "$old_pwd"
 }
 
-install_shell_config() {
+###########
+#  setup  #
+###########
+
+setup::shell() {
   install_symlink ".bash_profile"
   install_symlink ".bashrc"
   install_symlink ".zshenv"
@@ -65,19 +91,34 @@ install_shell_config() {
   install_symlink ".inputrc"
 }
 
-install_vim_config() {
-  mkdir -p ~/Library/Caches/vim/backup
-  mkdir -p ~/Library/Caches/vim/swap
-  mkdir -p ~/Library/Caches/vim/undo
+setup::vim() {
   install_symlink ".vimrc"
   install_symlink ".gvimrc"
   install_symlink ".vim"
   install_symlink ".config/nvim"
   curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+  local mvim_dir=/usr/local/bin
+  local old_pwd="$(pwd)"
+  cd "$mvim_dir"
+  if [[ -x "$mvim_dir/mvim" ]]; then
+    ln -s mvim vi
+    ln -s mvim view
+    ln -s mvim vim
+    ln -s mvim vimdiff
+    ln -s mvim vimex
+  else
+    [[ -e vi ]] || rm vi
+    [[ -e view ]] || rm view
+    [[ -e vim ]] || rm vim
+    [[ -e vimdiff ]] || rm vimdiff
+    [[ -e vimex ]] || rm vimex
+  fi
+  cd "$old_pwd"
 }
 
-install_gpg_config() {
+setup::gpg() {
   if [[ ! -d ~/.gnupg ]]; then
     mkdir ~/.gnupg
     chmod 700 ~/.gnupg
@@ -90,10 +131,11 @@ install_gpg_config() {
   install_symlink "Library/LaunchAgents/org.gnupg.gpg-agent.plist"
 }
 
-install_misc() {
+setup::misc() {
   install_symlink ".clang-format"
+  install_symlink ".config/git/config"
+  install_symlink ".config/git/ignore"
   install_symlink ".config/zathura/zathurarc"
-  install_symlink ".gitconfig"
   install_symlink ".ipython/profile_default/ipython_config.py"
   install_symlink ".latexmkrc"
   install_symlink ".local/bin/rmpkg"
@@ -106,4 +148,16 @@ install_misc() {
   install_symlink ".themes/zuki-themes"
 }
 
-main
+setup::install_deps() {
+  brew update
+  brew install \
+    cmake \
+    rust \
+    node \
+    zsh-completions \
+    zsh-syntax-highlighting
+
+  vim +PlugInstall +qall
+}
+
+main "$@"
