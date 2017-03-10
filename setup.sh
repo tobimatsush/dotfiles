@@ -125,7 +125,6 @@ setup::misc() {
   install_symlink ".local/opt/peda"
   install_symlink ".local/opt/pwndbg"
   install_symlink ".local/share/zsh/site-functions"
-  install_symlink ".mikutter/plugin"
   install_symlink ".nixpkgs/config.nix"
   install_symlink ".tern-config"
   install_symlink ".tmux.conf"
