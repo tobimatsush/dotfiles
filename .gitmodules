@@ -1,6 +1,3 @@
-[submodule "home/.mikutter/plugin/mikutter-uwm-hommage"]
-	path = home/.mikutter/plugin/mikutter-uwm-hommage
-	url = https://github.com/moguno/mikutter-uwm-hommage.git
 [submodule "home/.local/opt/peda"]
 	path = home/.local/opt/peda
 	url = https://github.com/longld/peda.git
