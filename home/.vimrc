@@ -8,9 +8,11 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'deton/jasegment.vim'
 Plug 'fatih/vim-go', {'for': 'go'}
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
+Plug 'junegunn/vim-peekaboo'
 Plug 'ledger/vim-ledger', {'for': 'ledger'}
 Plug 'lervag/vimtex', {'for': 'tex'}
 Plug 'majutsushi/tagbar'
+Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
 Plug 'mhinz/vim-signify'
 Plug 'rdnetto/YCM-generator', {'branch': 'stable',
   \ 'on': ['YcmGenerateConfig', 'CCGenerateConfig']}
@@ -26,6 +28,11 @@ Plug 'Valloric/YouCompleteMe', {
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
 " filetype plugin indent and syntax is handled by plug#end
 call plug#end()
+
+if !has('nvim')
+  packadd! matchit
+  runtime ftplugin/man.vim
+endif
 
 """""""""""""
 "  Editing  "
@@ -91,9 +98,7 @@ endfor
 """"""""""
 "  Misc  "
 """"""""""
-" Filetype Recognition "
 let g:tex_flavor='latex'
-au BufRead,BufNewFile *.cuh setfiletype cuda
 
 " QuickFix "
 set grepprg=rg\ --vimgrep\ --hidden
@@ -128,6 +133,9 @@ let g:ycm_global_ycm_extra_conf='~/.vim/ycm_extra_conf.py'
 " airline "
 let g:airline_theme='monochrome'
 let g:airline_skip_empty_sections=1
+
+" undotree "
+let g:undotree_WindowLayout=2
 
 " VimR "
 if has('gui_vimr')
