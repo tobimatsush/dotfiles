@@ -7,7 +7,8 @@ Plug 'easymotion/vim-easymotion'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'deton/jasegment.vim'
 Plug 'fatih/vim-go', {'for': 'go'}
-Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf', {'dir': '~/.local/opt/fzf', 'do': '~/.local/libexec/fzf/install'}
+Plug 'junegunn/fzf.vim'
 Plug 'junegunn/vim-peekaboo'
 Plug 'ledger/vim-ledger', {'for': 'ledger'}
 Plug 'lervag/vimtex', {'for': 'tex'}
@@ -60,7 +61,7 @@ set showmatch
 set wildmenu
 set title
 set mouse=a
-if $TERM =~? '.*-256color' && $TERM_PROGRAM !~? 'Apple_Terminal'
+if $TERM =~? '.*-256color' && has('termguicolors')
   set cursorline
   set termguicolors
   colorscheme molokai
@@ -82,13 +83,13 @@ set wrapscan
 "  Cache  "
 """""""""""
 if !has('nvim')
-  set viminfo+=n~/Library/Caches/vim/viminfo
+  set viminfo+=n~/.cache/vim/viminfo
 endif
-set dir=~/Library/Caches/vim/swap
+set dir=~/.cache/vim/swap
 set backup
-set backupdir=~/Library/Caches/vim/backup
+set backupdir=~/.cache/vim/backup
 set undofile
-set undodir=~/Library/Caches/vim/undo
+set undodir=~/.cache/vim/undo
 for d in [&dir, &backupdir, &undodir]
   if !isdirectory(d)
     call mkdir(iconv(d, &encoding, &termencoding), 'p')
@@ -120,7 +121,6 @@ let g:syntastic_go_checkers=['golint', 'govet', 'errcheck']
 let g:syntastic_mode_map={'mode': 'active', 'passive_filetypes': ['go']}
 
 " UltiSnips "
-let g:UltiSnipsUsePythonVersion=2
 let g:UltiSnipsExpandTrigger='<C-x><C-j>'
 let g:UltiSnipsSnippetsDir='~/.vim/after/UltiSnips'
 
@@ -136,8 +136,3 @@ let g:airline_skip_empty_sections=1
 
 " undotree "
 let g:undotree_WindowLayout=2
-
-" VimR "
-if has('gui_vimr')
-  source ~/.config/nvim/ginit.vim
-endif

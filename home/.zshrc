@@ -1,36 +1,36 @@
-fpath+=(~/.local/share/zsh/site-functions /usr/local/share/zsh-completions)
+fpath+=(~/.local/share/zsh/site-functions)
 autoload -Uz add-zsh-hook
 
 ###########################
 #  Environment Variables  #
 ###########################
-export CLICOLOR=1
-export GEM_HOME="$(/usr/local/bin/ruby -e 'print Gem.user_dir')"
+export GEM_HOME="$(/usr/bin/ruby -e 'print Gem.user_dir')"
 export GPG_TTY="$(tty)"
 
 typeset -U path
 path=(
   "$HOME/.local/bin"
-  "/usr/local/sbin"
   $path
   "$GEM_HOME/bin"
-  "$(/usr/local/bin/python -c 'import site; print(site.getuserbase())')/bin"
-  "$(/usr/local/bin/python3 -c 'import site; print(site.getuserbase())')/bin"
+  "$(/usr/bin/python -c 'import site; print(site.getuserbase())')/bin"
+  "$(/usr/bin/python3 -c 'import site; print(site.getuserbase())')/bin"
   "$GOPATH/bin"
 )
+
+source ~/.nix-profile/etc/profile.d/nix.sh
 
 ###########################
 #  Aliases and Functions  #
 ###########################
-unalias run-help
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-alias ls='ls -F'
+alias ls='ls -F --color=auto'
 alias ll='ls -lh'
 alias la='ls -lAh'
-alias qlook='qlmanage -p'
-alias sudoedit='sudo -e'
+alias peda='GDB_USE_PEDA=1 GDB_USE_PWNDBG=0 gdb'
+alias pwndbg='GDB_USE_PEDA=0 GDB_USE_PWNDBG=1 gdb'
+alias xmonad-replace='nohup xmonad --replace &> /dev/null &'
 autoload -Uz edit-command-line
 autoload -Uz run-help run-help-git run-help-openssl run-help-sudo
 autoload -Uz zmv
@@ -141,31 +141,8 @@ setopt no_flowcontrol
 autoload -Uz select-word-style && select-word-style bash
 autoload -Uz url-quote-magic && zle -N self-insert url-quote-magic
 
-# Tell Apple Terminal the working directory
-if [[ "$TERM_PROGRAM" == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]]; then
-  update_terminal_cwd() {
-
-    # Percent-encode the pathname.
-    local URL_PATH=''
-    {
-      # Use LC_CTYPE=C to process text byte-by-byte.
-      local i ch hexch LC_CTYPE=C LC_ALL=
-      for ((i = 1; i <= ${#PWD}; ++i)); do
-        ch="$PWD[i]"
-        if [[ "$ch" =~ [/._~A-Za-z0-9-] ]]; then
-          URL_PATH+="$ch"
-        else
-          hexch=$(printf "%02X" "'$ch")
-          URL_PATH+="%$hexch"
-        fi
-      done
-    }
-
-    printf '\e]7;%s\a' "file://$HOST$URL_PATH"
-  }
-  add-zsh-hook precmd update_terminal_cwd
-  update_terminal_cwd
-fi
+command -v lesspipe >/dev/null 2>&1 && eval "$(SHELL=/bin/sh lesspipe)"
+source /etc/zsh_command_not_found
 
 ###########
 #  Theme  #
@@ -209,15 +186,13 @@ else
     if [[ -n "$SSH_CONNECTION" ]]; then
       print -Pn "\e]0;%m: %1~\a"
     else
-      local title=""
-      [[ "$TERM_PROGRAM" != "Apple_Terminal" ]] && title="%1~"
-      print -Pn "\e]0;$title\a"
+      print -Pn "\e]0;%1~\a"
     fi
   }
 
   add-zsh-hook precmd update_prompt
   add-zsh-hook preexec update_title
 
-  source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
   ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
 fi

@@ -5,6 +5,7 @@ startup_message off
 verbose on
 autodetach on
 ignorecase on
+term xterm-256color
 defflow off
 
 ############

@@ -1,3 +1,8 @@
-[submodule "home/.themes/zuki-themes"]
-	path = home/.themes/zuki-themes
-	url = https://github.com/lassekongo83/zuki-themes.git
+[submodule "home/.local/opt/peda"]
+	path = home/.local/opt/peda
+	url = https://github.com/longld/peda.git
+	ignore = all
+[submodule "home/.local/opt/pwndbg"]
+	path = home/.local/opt/pwndbg
+	url = https://github.com/pwndbg/pwndbg.git
+	ignore = all

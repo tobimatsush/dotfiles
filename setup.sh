@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DOTFILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-[[ -z "$DOTFILE_DIR" ]] && DOTFILE_DIR=~/Library/dotfiles
+[[ -z "$DOTFILE_DIR" ]] && DOTFILE_DIR=~/.config/dotfiles
 
 main() {
   local install_plugins=""
@@ -86,8 +86,10 @@ install_symlink() {
 setup::shell() {
   install_symlink ".bash_profile"
   install_symlink ".bashrc"
+  install_symlink ".bash_logout"
   install_symlink ".zshenv"
   install_symlink ".zshrc"
+  install_symlink ".zlogout"
   install_symlink ".inputrc"
 }
 
@@ -98,24 +100,6 @@ setup::vim() {
   install_symlink ".config/nvim"
   curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-  local mvim_dir=/usr/local/bin
-  local old_pwd="$(pwd)"
-  cd "$mvim_dir"
-  if [[ -x "$mvim_dir/mvim" ]]; then
-    ln -s mvim vi
-    ln -s mvim view
-    ln -s mvim vim
-    ln -s mvim vimdiff
-    ln -s mvim vimex
-  else
-    [[ -e vi ]] || rm vi
-    [[ -e view ]] || rm view
-    [[ -e vim ]] || rm vim
-    [[ -e vimdiff ]] || rm vimdiff
-    [[ -e vimex ]] || rm vimex
-  fi
-  cd "$old_pwd"
 }
 
 setup::gpg() {
@@ -128,7 +112,6 @@ setup::gpg() {
   chmod 600 "$DOTFILE_DIR/home/.gnupg/gpg.conf"
   install_symlink ".gnupg/gpg-agent.conf"
   install_symlink ".gnupg/gpg.conf"
-  install_symlink "Library/LaunchAgents/org.gnupg.gpg-agent.plist"
 }
 
 setup::misc() {
@@ -136,35 +119,43 @@ setup::misc() {
   install_symlink ".config/git/config"
   install_symlink ".config/git/ignore"
   install_symlink ".config/latexmk/latexmkrc"
+  install_symlink ".config/ranger/rc.conf"
+  install_symlink ".config/ranger/scope.sh"
   install_symlink ".config/zathura/zathurarc"
+  install_symlink ".gdbinit"
   install_symlink ".ipython/profile_default/ipython_config.py"
-  install_symlink ".local/bin/rmpkg"
+  install_symlink ".local/libexec/fzf/install"
+  install_symlink ".local/opt/peda"
+  install_symlink ".local/opt/pwndbg"
   install_symlink ".local/share/zsh/site-functions"
+  install_symlink ".mikutter/plugin"
+  install_symlink ".nixpkgs/config.nix"
   install_symlink ".screenrc"
   install_symlink ".tern-config"
   install_symlink ".tmux.conf"
-
-  # gtk
-  install_symlink ".gtkrc-2.0"
-  install_symlink ".themes/zuki-themes"
+  install_symlink ".xprofile"
+  install_symlink ".xmonad"
 
   # spacemacs
   [[ ! -d ~/.emacs.d ]] && git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
   install_symlink ".spacemacs"
 
   # vscode
-  install_symlink "Library/Application Support/Code/User/settings.json"
-  chmod 700 ~/Library/Application\ Support/Code
+  install_symlink ".config/Code/User/settings.json"
+  chmod 700 ~/.config/Code
 }
 
 setup::install_plugins() {
-  brew update
-  brew install \
+  sudo apt-get update
+  sudo apt-get install -y \
+    build-essential \
     cmake \
-    rust \
-    node \
-    zsh-completions \
+    cargo \
+    rustc \
+    npm \
+    nodejs \
     zsh-syntax-highlighting
+  sudo ln -s /usr/bin/nodejs /usr/local/bin/node
 
   vim +PlugInstall +qall
 }
