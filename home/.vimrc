@@ -25,7 +25,7 @@ Plug 'tomasr/molokai'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'Valloric/YouCompleteMe', {
-  \ 'do': './install.py --clang-completer --tern-completer --racer-completer'}
+  \ 'do': './install.py --clang-completer --tern-completer'}
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
 " filetype plugin indent and syntax is handled by plug#end
 call plug#end()
