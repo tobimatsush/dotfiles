@@ -61,10 +61,10 @@ set showmatch
 set wildmenu
 set title
 set mouse=a
+set cursorline
+colorscheme molokai
 if $TERM =~? '.*-256color' && has('termguicolors')
-  set cursorline
   set termguicolors
-  colorscheme molokai
 endif
 if has('nvim')
   set inccommand=split
