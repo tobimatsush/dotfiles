@@ -12,6 +12,7 @@ Plug 'junegunn/fzf.vim'
 Plug 'junegunn/vim-peekaboo'
 Plug 'ledger/vim-ledger', {'for': 'ledger'}
 Plug 'lervag/vimtex', {'for': 'tex'}
+Plug 'LnL7/vim-nix', {'for': 'nix'}
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
 Plug 'mhinz/vim-signify'
@@ -102,9 +103,11 @@ endfor
 let g:tex_flavor='latex'
 
 " QuickFix "
-set grepprg=rg\ --vimgrep\ --hidden
 au QuickfixCmdPost [^lA-Z]* cwindow
 au QuickfixCmdPost l* lwindow
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --hidden
+endif
 
 " FZF "
 command! -bang -nargs=* Grep
