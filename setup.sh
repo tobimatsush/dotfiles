@@ -42,6 +42,8 @@ setup::shell() {
   install::default ".zshenv"
   install::default ".zshrc"
   install::default ".inputrc"
+  install::default ".config/shell/common.snip"
+  install::default ".local/share/zsh/site-functions"
 }
 
 setup::vim() {
@@ -96,6 +98,12 @@ setup::misc() {
   install::default ".local/bin/rmpkg"
   install::default ".local/bin/imgcat"
   install::default ".local/share/zsh/site-functions"
+  install::default ".local/libexec/fzf/install"
+  install::default ".local/opt/fzftools"
+  install::default ".local/opt/gef"
+  install::default ".local/opt/peda"
+  install::default ".local/opt/pwndbg"
+  install::default ".nixpkgs/config.nix"
   install::default ".screenrc"
   install::default ".tern-config"
   install::default ".tmux.conf"

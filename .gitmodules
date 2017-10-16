@@ -2,3 +2,7 @@
 	path = home/.themes/zuki-themes
 	url = https://github.com/lassekongo83/zuki-themes.git
 	ignore = all
+[submodule "home/.local/opt/fzftools"]
+	path = home/.local/opt/fzftools
+	url = https://github.com/midchildan/fzftools.git
+	ignore = all
