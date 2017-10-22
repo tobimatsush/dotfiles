@@ -10,8 +10,9 @@ export USE_POWERLINE=0
 
 typeset -U path
 path=(
-  "$HOME/.local/bin"
+  ~/.local/bin
   $path
+  ~/.cargo/bin
   "$GEM_HOME/bin"
   "$(/usr/bin/python -c 'import site; print(site.getuserbase())')/bin"
   "$(/usr/bin/python3 -c 'import site; print(site.getuserbase())')/bin"
@@ -36,7 +37,7 @@ alias xmonad-replace='nohup xmonad --replace &> /dev/null &'
 autoload -Uz edit-command-line
 autoload -Uz run-help run-help-git run-help-openssl run-help-sudo
 autoload -Uz zmv
-autoload -Uz fzf-sel fzf-run
+autoload -Uz fzf-sel fzf-run fzf-loop
 
 #################
 #  Directories  #
@@ -153,7 +154,7 @@ source /etc/zsh_command_not_found
 ###########
 setopt prompt_subst
 
-[[ -z "$DISPLAY$WAYLAND_DISPLAY" ]] && USE_POWERLINE=0
+[[ -z "$DISPLAY$WAYLAND_DISPLAY$SSH_CONNECTION" ]] && unset USE_POWERLINE
 
 if [[ "$TERM" == "dumb" ]]; then
   PROMPT="%n: %~%# "

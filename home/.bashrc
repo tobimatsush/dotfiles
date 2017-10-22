@@ -10,12 +10,15 @@ export GEM_HOME="$(/usr/bin/ruby -e 'print Gem.user_dir')"
 export GPG_TTY="$(tty)"
 export USE_POWERLINE=0
 
-PATH="~/.local/bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
+PATH+=":$HOME/.cargo/bin"
 PATH+=":$GEM_HOME/bin"
 PATH+=":$(/usr/bin/python -c 'import site; print(site.getuserbase())')/bin"
 PATH+=":$(/usr/bin/python3 -c 'import site; print(site.getuserbase())')/bin"
 PATH+=":$GOPATH/bin"
 export PATH
+
+source ~/.nix-profile/etc/profile.d/nix.sh
 
 ###########################
 #  Aliases and Functions  #
@@ -45,7 +48,7 @@ shopt -s histappend
 ###########
 #  Theme  #
 ###########
-[[ -z "$DISPLAY$WAYLAND_DISPLAY" ]] && USE_POWERLINE=0
+[[ -z "$DISPLAY$WAYLAND_DISPLAY$SSH_CONNECTION" ]] && unset USE_POWERLINE
 
 if [[ -z "${debian_root:-}" ]] && [[ -r /etc/debian_chroot ]]; then
   debian_chroot=$(cat /etc/debian_chroot)

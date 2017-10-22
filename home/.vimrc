@@ -5,7 +5,6 @@ call plug#begin('~/.vim/plugged')
 Plug 'altercation/vim-colors-solarized'
 Plug 'easymotion/vim-easymotion'
 Plug 'editorconfig/editorconfig-vim'
-Plug 'deton/jasegment.vim'
 Plug 'fatih/vim-go', {'for': 'go'}
 Plug 'junegunn/fzf', {'dir': '~/.local/opt/fzf', 'do': '~/.local/libexec/fzf/install'}
 Plug 'junegunn/fzf.vim'
@@ -20,7 +19,6 @@ Plug 'rdnetto/YCM-generator', {'branch': 'stable',
   \ 'on': ['YcmGenerateConfig', 'CCGenerateConfig']}
 Plug 'rust-lang/rust.vim', {'for': 'rust'}
 Plug 'scrooloose/nerdtree', {'on': 'NERDTreeToggle'}
-Plug 'scrooloose/syntastic'
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 Plug 'tomasr/molokai'
 Plug 'tpope/vim-fugitive'
@@ -28,6 +26,7 @@ Plug 'tpope/vim-surround'
 Plug 'Valloric/YouCompleteMe', {
   \ 'do': './install.py --clang-completer --tern-completer'}
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
+Plug 'w0rp/ale'
 " filetype plugin indent and syntax is handled by plug#end
 call plug#end()
 
@@ -45,7 +44,7 @@ set expandtab
 set shiftwidth=2
 set softtabstop=2
 set autoindent
-set linebreak
+let mapleader="\<Space>"
 
 """"""""
 "  UI  "
@@ -121,13 +120,6 @@ command! -bang -nargs=* Grep
 " EasyMotion"
 let g:EasyMotion_use_migemo=1
 
-" Syntastic "
-let g:syntastic_always_populate_loc_list=1
-let g:syntastic_check_on_open=1
-let g:syntastic_check_on_wq=0
-let g:syntastic_go_checkers=['golint', 'govet', 'errcheck']
-let g:syntastic_mode_map={'mode': 'active', 'passive_filetypes': ['go']}
-
 " UltiSnips "
 let g:UltiSnipsExpandTrigger='<C-x><C-j>'
 let g:UltiSnipsSnippetsDir='~/.vim/after/UltiSnips'
@@ -139,7 +131,6 @@ let g:ycm_key_invoke_completion=''
 let g:ycm_global_ycm_extra_conf='~/.vim/ycm_extra_conf.py'
 
 " airline "
-let g:airline_theme='monochrome'
 let g:airline_skip_empty_sections=1
 if $USE_POWERLINE
   let g:airline_powerline_fonts=1
