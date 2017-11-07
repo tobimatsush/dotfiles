@@ -41,8 +41,8 @@ endif
 set encoding=utf-8
 set backspace=indent,eol,start
 set expandtab
-set shiftwidth=2
-set softtabstop=2
+set shiftwidth=4
+set softtabstop=4
 set autoindent
 let mapleader="\<Space>"
 
