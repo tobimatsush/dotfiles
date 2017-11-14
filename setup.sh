@@ -119,14 +119,8 @@ setup::plugins() {
   brew update
   brew install \
     cmake \
-<<<<<<< HEAD
-    rust \
     node \
     zsh-completions \
-=======
-    npm \
-    nodejs \
->>>>>>> master
     zsh-syntax-highlighting
 
   vim +PlugInstall +qall
