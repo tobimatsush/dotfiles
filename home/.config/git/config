@@ -1,7 +1,12 @@
 [user]
 	name = tobimatsush
 	email = tobimatsush@gmail.com
+        signingkey = 0x196DECD329691B10
 [push]
 	default = simple
 [merge]
 	tool = vimdiff
+[commit]
+	gpgsign = true
+[alias]
+	exec = "!exec " # run a shell command from the top directory
