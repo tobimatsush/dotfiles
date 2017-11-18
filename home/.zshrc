@@ -11,9 +11,9 @@ export USE_POWERLINE=0
 
 typeset -U path
 path=(
-  "$HOME/.local/bin"
-  "/usr/local/opt/python/libexec/bin"
-  "/usr/local/sbin"
+  ~/.local/bin
+  /usr/local/opt/python/libexec/bin
+  /usr/local/sbin
   $path
   ~/.cargo/bin
   "$GEM_HOME/bin"
@@ -37,7 +37,7 @@ alias sudoedit='sudo -e'
 autoload -Uz edit-command-line
 autoload -Uz run-help run-help-git run-help-openssl run-help-sudo
 autoload -Uz zmv
-autoload -Uz fzf-sel fzf-run fzf-loop
+autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
 
 #################
 #  Directories  #

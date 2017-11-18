@@ -43,7 +43,14 @@ set expandtab
 set shiftwidth=4
 set softtabstop=4
 set autoindent
+
+" swap leader key (\) and space
 let mapleader="\<Space>"
+noremap \ <Space>
+
+imap <C-x><C-x><C-f> <Plug>(fzf-complete-path)
+imap <C-x><C-x><C-k> <Plug>(fzf-complete-word)
+imap <C-x><C-x><C-l> <Plug>(fzf-complete-line)
 
 """"""""
 "  UI  "
@@ -60,6 +67,8 @@ set showmatch
 set wildmenu
 set title
 set mouse=a
+
+" colors
 if $TERM =~? '.*-256color' && $TERM_PROGRAM !=? 'Apple_Terminal'
   set cursorline
   set termguicolors
@@ -72,6 +81,10 @@ endif
 if has('nvim')
   set inccommand=split
 endif
+
+" show extra whitespace
+hi link ExtraWhitespace Error
+au Syntax * syn match ExtraWhitespace /\s\+$\| \+\ze\t/
 
 """"""""""""
 "  Search  "
@@ -105,8 +118,8 @@ endfor
 let g:tex_flavor='latex'
 
 " QuickFix "
-au QuickfixCmdPost [^lA-Z]* cwindow
-au QuickfixCmdPost l* lwindow
+au QuickfixCmdPost [^lA-Z]* botright cwindow
+au QuickfixCmdPost l* botright lwindow
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --hidden
 endif
@@ -128,6 +141,7 @@ let g:ycm_key_list_select_completion=[]
 let g:ycm_key_list_previous_completion=[]
 let g:ycm_key_invoke_completion=''
 let g:ycm_global_ycm_extra_conf='~/.vim/ycm_extra_conf.py'
+let g:ycm_rust_src_path='~/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src'
 
 " airline "
 let g:airline_skip_empty_sections=1
