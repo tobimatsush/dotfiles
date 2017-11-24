@@ -44,13 +44,26 @@ set shiftwidth=4
 set softtabstop=4
 set autoindent
 
+"""""""""""""""""
+"  keybindings  "
+"""""""""""""""""
 " swap leader key (\) and space
 let mapleader="\<Space>"
 noremap \ <Space>
 
+" FZF mappings
 imap <C-x><C-x><C-f> <Plug>(fzf-complete-path)
 imap <C-x><C-x><C-k> <Plug>(fzf-complete-word)
 imap <C-x><C-x><C-l> <Plug>(fzf-complete-line)
+inoremap <C-x><C-x><C-j> <Esc>:Snippets<CR>
+nnoremap <Leader>gf :Files<CR>
+nnoremap <Leader>gb :Buffers<CR>
+nnoremap <Leader>g/ :Lines<CR>
+nnoremap <Leader>' :Marks<CR>
+nnoremap <Leader>/ :BLines<CR>
+nnoremap <Leader>: :Commands<CR>
+nnoremap <Leader><C-o> :History<CR>
+nnoremap <Leader><C-]> :Tags <C-r>=expand("<cword>")<CR><CR>
 
 """"""""
 "  UI  "
@@ -130,6 +143,9 @@ command! -bang -nargs=* Grep
 
 " EasyMotion"
 let g:EasyMotion_use_migemo=1
+
+" EditorConfig
+let g:EditorConfig_exclude_patterns=['fugitive://.*', '\(M\|m\|GNUm\)akefile']
 
 " UltiSnips "
 let g:UltiSnipsUsePythonVersion=2
