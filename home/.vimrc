@@ -12,6 +12,7 @@ Plug 'junegunn/vim-peekaboo'
 Plug 'ledger/vim-ledger', {'for': 'ledger'}
 Plug 'lervag/vimtex', {'for': 'tex'}
 Plug 'LnL7/vim-nix', {'for': 'nix'}
+Plug 'machakann/vim-sandwich'
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
 Plug 'mhinz/vim-signify'
@@ -22,7 +23,6 @@ Plug 'scrooloose/nerdtree', {'on': 'NERDTreeToggle'}
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 Plug 'tomasr/molokai'
 Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-surround'
 Plug 'Valloric/YouCompleteMe', {
   \ 'do': './install.py --clang-completer --tern-completer'}
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
@@ -56,15 +56,19 @@ noremap \ <Space>
 imap <C-x><C-x><C-f> <Plug>(fzf-complete-path)
 imap <C-x><C-x><C-k> <Plug>(fzf-complete-word)
 imap <C-x><C-x><C-l> <Plug>(fzf-complete-line)
-inoremap <C-x><C-x><C-j> <Esc>:Snippets<CR>
-nnoremap <Leader>gf :Files<CR>
-nnoremap <Leader>gb :Buffers<CR>
-nnoremap <Leader>g/ :Lines<CR>
-nnoremap <Leader>' :Marks<CR>
-nnoremap <Leader>/ :BLines<CR>
-nnoremap <Leader>: :Commands<CR>
-nnoremap <Leader><C-o> :History<CR>
-nnoremap <Leader><C-]> :Tags <C-r>=expand("<cword>")<CR><CR>
+inoremap <silent> <C-x><C-x><C-j> <Esc>:Snippets<CR>
+nnoremap <silent> <Leader>gf :Files<CR>
+nnoremap <silent> <Leader>gb :Buffers<CR>
+nnoremap <silent> <Leader>g/ :Lines<CR>
+nnoremap <silent> <Leader>' :Marks<CR>
+nnoremap <silent> <Leader>/ :BLines<CR>
+nnoremap <silent> <Leader>: :Commands<CR>
+nnoremap <silent> <Leader><C-o> :History<CR>
+nnoremap <silent> <Leader><C-]> :Tags <C-r>=expand("<cword>")<CR><CR>
+
+" vim-sandwich
+nmap s <Nop>
+xmap s <Nop>
 
 """"""""
 "  UI  "
@@ -133,13 +137,24 @@ let g:tex_flavor='latex'
 " QuickFix "
 au QuickfixCmdPost [^lA-Z]* botright cwindow
 au QuickfixCmdPost l* botright lwindow
-if executable('rg')
+
+let s:has_rg = executable('rg')
+if s:has_rg
   set grepprg=rg\ --vimgrep\ --hidden
 endif
 
 " FZF "
-command! -bang -nargs=* Grep
-  \ call fzf#vim#grep('rg --vimgrep --color=always '.shellescape(<q-args>), 1, <bang>0)
+command! -bang Compilers
+  \ call midchildan#fzf_compilers(0, <bang>0)
+command! -bang BCompilers
+  \ call midchildan#fzf_compilers(1, <bang>0)
+if s:has_rg
+  command! -bang -nargs=* Grep
+    \ call fzf#vim#grep('rg --vimgrep --color=always '.shellescape(<q-args>), 1, <bang>0)
+else
+  command! -bang -nargs=* Grep
+    \ call fzf#vim#grep('grep -r --line-number '.shellescape(<q-args>).' *', 0, <bang>0)
+endif
 
 " EasyMotion"
 let g:EasyMotion_use_migemo=1
