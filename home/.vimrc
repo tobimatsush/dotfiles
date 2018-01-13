@@ -1,5 +1,5 @@
 """"""""""""""""""""
-"  Initialization  "
+" initialization  "
 """"""""""""""""""""
 call plug#begin('~/.vim/plugged')
 " editing
@@ -51,7 +51,8 @@ if !has('nvim')
   runtime ftplugin/man.vim
 endif
 
-augroup vimrc autocmd!
+augroup vimrc
+  autocmd!
 augroup END
 
 """""""""""""
@@ -155,6 +156,7 @@ set mouse=a
 
 " colors
 if $TERM =~? '.*-256color' && has('termguicolors')
+  set cursorline
   set termguicolors
   colorscheme molokai
   if !has('nvim') && $TERM ==? 'screen-256color'
