@@ -17,8 +17,7 @@ path=(
   $path
   ~/.cargo/bin
   "$GEM_HOME/bin"
-  "$(/usr/local/bin/python2 -c 'import site; print(site.getuserbase())')/bin"
-  "$(/usr/local/bin/python3 -c 'import site; print(site.getuserbase())')/bin"
+  "$(python3 -c 'import site; print(site.getuserbase())')/bin"
   "$GOPATH/bin"
 )
 
@@ -34,8 +33,6 @@ alias ll='ls -lh'
 alias la='ls -lAh'
 alias qlook='qlmanage -p'
 alias sudoedit='sudo -e'
-autoload -Uz edit-command-line
-autoload -Uz run-help run-help-git run-help-openssl run-help-sudo
 autoload -Uz zmv
 autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
 
@@ -90,9 +87,9 @@ autoload -Uz compinit && compinit -C
 #################
 #  Keybindings  #
 #################
+autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz smart-insert-last-word && zle -N smart-insert-last-word
-autoload -Uz incarg && zle -N incarg
-autoload -Uz decarg && zle -N decarg
+autoload -Uz run-help run-help-git run-help-openssl run-help-sudo
 autoload -Uz fzf-complete && zle -N fzf-complete
 autoload -Uz fzf-cd-widget && zle -N fzf-cd-widget
 autoload -Uz fzf-file-widget && zle -N fzf-file-widget
@@ -102,6 +99,9 @@ autoload -Uz surround \
   && zle -N delete-surround surround \
   && zle -N add-surround surround \
   && zle -N change-surround surround
+autoload -Uz vim-incarg \
+  && zle -N vim-incarg \
+  && zle -N vim-decarg vim-incarg
 
 bindkey -v
 bindkey -rv '^[,' '^[/' '^[~'
@@ -125,9 +125,9 @@ bindkey -a \
   'sd' delete-surround \
   'sr' change-surround \
   'K' run-help \
-  '^A' incarg \
-  '^X' decarg
-bindkey -M visual 'S' add-surround
+  '^A' vim-incarg \
+  '^X' vim-decarg \
+  '!' edit-command-line
 bindkey -M menuselect \
   '^B' backward-char \
   '^F' forward-char \

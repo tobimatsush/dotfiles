@@ -58,6 +58,8 @@ augroup END
 "  Editing  "
 """""""""""""
 set encoding=utf-8
+set fileencodings=ucs-bom,utf-8,iso-2022-jp,euc-jp,cp932,default,latin1
+set fileformats=unix,dos,mac
 set backspace=indent,eol,start
 set expandtab
 set shiftwidth=4
@@ -71,72 +73,6 @@ au vimrc BufReadPost *
   \ |   exe "normal! g`\""
   \ | endif
 
-"""""""""""""""""
-"  keybindings  "
-"""""""""""""""""
-let mapleader="\<Space>"
-let maplocalleader="\<Space>\<Space>"
-" XXX: Workaround for <Nop> bug in vim/vim#1548, neovim/neovim#6241
-noremap <Space> \
-
-" a more logical mapping for Y
-nnoremap Y y$
-" break undo before deleting a whole line
-inoremap <C-u> <C-g>u<C-u>
-" a more powerful <C-l>
-nnoremap <silent> <Leader><C-l> :nohlsearch<CR>:call vimrc#refresh()<CR>
-
-" text objects
-xnoremap <silent> ae gg0oG$
-onoremap <silent> ae :<C-u>exe "normal! m`"<Bar>keepjumps normal! ggVG<CR>
-xnoremap <silent> al <Esc>0v$
-onoremap <silent> al :<C-u>normal! 0v$<CR>
-xnoremap <silent> il <Esc>^vg_
-onoremap <silent> il :<C-u>normal! ^vg_<CR>
-" XXX: Same feature as vim/vim#958
-xmap im <Plug>(textobj-sandwich-literal-query-i)
-omap im <Plug>(textobj-sandwich-literal-query-i)
-xmap am <Plug>(textobj-sandwich-literal-query-a)
-omap am <Plug>(textobj-sandwich-literal-query-a)
-
-" toggles
-nnoremap <silent> <Leader>tf :NERDTreeToggle<CR>
-nnoremap <silent> <Leader>tl :ALEToggle<CR>
-nnoremap <silent> <Leader>tt :TagbarToggle<CR>
-nnoremap <silent> <Leader>tu :UndotreeToggle<CR>
-nnoremap <silent> <Leader>t# :setlocal relativenumber! relativenumber?<CR>
-nnoremap <silent> <Leader>t<Space> :AirlineToggleWhitespace<CR>
-
-" FZF mappings
-imap <C-x><C-x><C-f> <Plug>(fzf-complete-path)
-imap <C-x><C-x><C-k> <Plug>(fzf-complete-word)
-imap <C-x><C-x><C-l> <Plug>(fzf-complete-line)
-inoremap <silent> <C-x><C-x><C-j> <Esc>:Snippets<CR>
-nnoremap <silent> <Leader>gf :Files<CR>
-nnoremap <silent> <Leader>gb :Buffers<CR>
-nnoremap <silent> <Leader>g/ :Lines<CR>
-nnoremap <silent> <Leader>' :Marks<CR>
-nnoremap <silent> <Leader>/ :BLines<CR>
-nnoremap <silent> <Leader>: :Commands<CR>
-nnoremap <silent> <Leader><C-o> :History<CR>
-nnoremap <silent> <Leader><C-]> :Tags <C-r>=expand("<cword>")<CR><CR>
-
-" easymotion
-map <Leader>j <Plug>(easymotion-j)
-map <Leader>k <Plug>(easymotion-k)
-map <Leader>s <Plug>(easymotion-s2)
-nmap <Leader>s <Plug>(easymotion-overwin-f2)
-map g/ <Plug>(easymotion-sn)
-omap g/ <Plug>(easymotion-tn)
-
-" vim-easy-align
-nmap g= <Plug>(EasyAlign)
-xmap g= <Plug>(EasyAlign)
-
-" vim-sandwich
-nmap s <Nop>
-xmap s <Nop>
-
 """"""""
 "  UI  "
 """"""""
@@ -148,6 +84,7 @@ set noshowmode
 set cmdheight=1
 set laststatus=2
 set display=lastline
+set lazyredraw
 set showmatch
 set wildmenu
 set title
@@ -167,9 +104,9 @@ if has('nvim')
   set inccommand=split
 endif
 
-" show extra whitespace
-hi link ExtraWhitespace Error
-au vimrc Syntax * syn match ExtraWhitespace /\s\+$\| \+\ze\t/
+" show whitespace errors
+hi link WhitespaceError Error
+au vimrc Syntax * syn match WhitespaceError /\s\+$\| \+\ze\t/
 
 """"""""""""
 "  Search  "
@@ -179,6 +116,7 @@ set hlsearch
 set ignorecase
 set smartcase
 set wrapscan
+set tags=./tags;,tags
 
 """""""""""
 "  Cache  "
@@ -191,11 +129,99 @@ set backup
 set backupdir=~/Library/Caches/vim/backup
 set undofile
 set undodir=~/Library/Caches/vim/undo
-for d in [&dir, &backupdir, &undodir]
-  if !isdirectory(d)
-    call mkdir(iconv(d, &encoding, &termencoding), 'p')
+for s:d in [&dir, &backupdir, &undodir]
+  if !isdirectory(s:d)
+    call mkdir(iconv(s:d, &encoding, &termencoding), 'p')
   endif
 endfor
+
+"""""""""""""""""
+"  Keybindings  "
+"""""""""""""""""
+let mapleader="\<Space>"
+let maplocalleader="\<Space>\<Space>"
+" XXX: Workaround for <Nop> bug in vim/vim#1548, neovim/neovim#6241
+nnoremap <Space> \
+xnoremap <Space> \
+
+" a more logical mapping for Y
+nnoremap Y y$
+" break undo before deleting a whole line
+inoremap <C-u> <C-g>u<C-u>
+" a more powerful <C-l>
+nnoremap <silent> <Leader><C-l> :nohlsearch<CR>:call vimrc#refresh()<CR>
+
+" find merge conflict marker
+nnoremap <silent> <Leader>fc /\v^[<=>]{7}( .*<Bar>$)<CR>
+xnoremap <silent> <Leader>fc /\v^[<=>]{7}( .*<Bar>$)<CR>
+onoremap <silent> <Leader>fc /\v^[<=>]{7}( .*<Bar>$)<CR>
+" find whitespace errors
+nnoremap <silent> <Leader>f<Space> /\s\+$\<Bar> \+\ze\t<CR>
+xnoremap <silent> <Leader>f<Space> /\s\+$\<Bar> \+\ze\t<CR>
+onoremap <silent> <Leader>f<Space> /\s\+$\<Bar> \+\ze\t<CR>
+
+" text objects
+xnoremap <silent> ae gg0oG$
+onoremap <silent> ae :<C-u>exe "normal! m`"<Bar>keepjumps normal! ggVG<CR>
+xnoremap <silent> al <Esc>0v$
+onoremap <silent> al :<C-u>normal! 0v$<CR>
+xnoremap <silent> il <Esc>^vg_
+onoremap <silent> il :<C-u>normal! ^vg_<CR>
+" XXX: Same feature as vim/vim#958
+xmap im <Plug>(textobj-sandwich-literal-query-i)
+omap im <Plug>(textobj-sandwich-literal-query-i)
+xmap am <Plug>(textobj-sandwich-literal-query-a)
+omap am <Plug>(textobj-sandwich-literal-query-a)
+
+" toggles
+nnoremap <silent> <Leader>tf :NERDTreeToggle<CR>
+nnoremap <silent> <Leader>tl :ALEToggle<CR>
+nnoremap <silent> <Leader>ts :setlocal spell! spell?<CR>
+nnoremap <silent> <Leader>tt :TagbarToggle<CR>
+nnoremap <silent> <Leader>tu :UndotreeToggle<CR>
+nnoremap <silent> <Leader>tv :call vimrc#toggle_virtualedit()<CR>
+nnoremap <silent> <Leader>t# :setlocal relativenumber! relativenumber?<CR>
+nnoremap <silent> <Leader>t<Space> :AirlineToggleWhitespace<CR>
+
+" FZF mappings
+imap <C-x><C-x><C-f> <Plug>(fzf-complete-path)
+imap <C-x><C-x><C-k> <Plug>(fzf-complete-word)
+imap <C-x><C-x><C-l> <Plug>(fzf-complete-line)
+inoremap <silent> <C-x><C-x><C-j> <Esc>:Snippets<CR>
+nnoremap <silent> <Leader>gf :Files<CR>
+nnoremap <silent> <Leader>gb :Buffers<CR>
+nnoremap <silent> <Leader>g/ :Lines<CR>
+nnoremap <silent> <Leader>g<C-]> :Tags <C-r>=expand("<cword>")<CR><CR>
+nnoremap <silent> <Leader>q: :History:<CR>
+nnoremap <silent> <Leader>q/ :History/<CR>
+nnoremap <silent> <Leader>' :Marks<CR>
+nnoremap <silent> <Leader>/ :BLines<CR>
+nnoremap <silent> <Leader>: :Commands<CR>
+nnoremap <silent> <Leader><C-o> :History<CR>
+nnoremap <silent> <Leader><C-]> :BTags <C-r>=expand("<cword>")<CR><CR>
+
+" easymotion
+nmap <Leader>j <Plug>(easymotion-j)
+xmap <Leader>j <Plug>(easymotion-j)
+omap <Leader>j <Plug>(easymotion-j)
+nmap <Leader>k <Plug>(easymotion-k)
+xmap <Leader>k <Plug>(easymotion-k)
+omap <Leader>k <Plug>(easymotion-k)
+nmap <Leader>s <Plug>(easymotion-s2)
+xmap <Leader>s <Plug>(easymotion-s2)
+omap <Leader>s <Plug>(easymotion-s2)
+nmap <Leader>s <Plug>(easymotion-overwin-f2)
+nmap g/ <Plug>(easymotion-sn)
+xmap g/ <Plug>(easymotion-sn)
+omap g/ <Plug>(easymotion-tn)
+
+" vim-easy-align
+nmap g= <Plug>(EasyAlign)
+xmap g= <Plug>(EasyAlign)
+
+" vim-sandwich
+nmap s <Nop>
+xmap s <Nop>
 
 """"""""""
 "  Misc  "
@@ -237,9 +263,7 @@ let g:EasyMotion_use_migemo=1
 let g:EditorConfig_exclude_patterns=['fugitive://.*', '\(M\|m\|GNUm\)akefile']
 
 " UltiSnips "
-let g:UltiSnipsUsePythonVersion=2
 let g:UltiSnipsExpandTrigger='<C-x><C-j>'
-let g:UltiSnipsSnippetsDir='~/.vim/after/UltiSnips'
 
 " YouCompleteMe "
 let g:ycm_key_list_select_completion=[]

@@ -12,7 +12,7 @@ func! vimrc#refresh()
   endif
   diffupdate
   syntax sync fromstart
-  normal! <C-l>
+  redraw!
 endf
 
 func! vimrc#fzf_compilers(is_buffer, bang)
@@ -25,4 +25,13 @@ func! vimrc#fzf_compilers(is_buffer, bang)
   \ 'sink':    a:is_buffer ? 'compiler' : 'compiler!',
   \ 'options': a:is_buffer ? '+m --prompt="BCompilers> "' : '+m --prompt="Compilers> "'
   \}, a:bang))
+endf
+
+func! vimrc#toggle_virtualedit()
+  if empty(&virtualedit)
+    set virtualedit=all
+  else
+    set virtualedit=
+  endif
+  set virtualedit?
 endf
