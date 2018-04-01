@@ -101,9 +101,11 @@ setup::misc() {
   install::default ".local/bin/rmpkg"
   install::default ".local/bin/imgcat"
   install::default ".local/opt/fzftools"
+  install::default ".nanorc"
   install::default ".screenrc"
   install::default ".tern-config"
   install::default ".tmux.conf"
+  install::default ".wgetrc"
 
   # gtk
   install::default ".gtkrc-2.0"

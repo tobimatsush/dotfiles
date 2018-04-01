@@ -1,0 +1,24 @@
+diff --git a/home/.vimrc b/home/.vimrc
+index 34b0f2e..4c6e492 100644
+--- a/home/.vimrc
++++ b/home/.vimrc
+@@ -276,6 +276,7 @@ let g:ycm_key_list_select_completion=[]
+ let g:ycm_key_list_previous_completion=[]
+ let g:ycm_key_invoke_completion=''
+ let g:ycm_global_ycm_extra_conf='~/.vim/ycm_extra_conf.py'
++let g:ycm_server_python_interpreter='/usr/local/var/pyenv/shims/python'
+ let g:ycm_rust_src_path='~/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src'
+ 
+ " airline "
+diff --git a/home/.zshrc b/home/.zshrc
+index f017d42..b60e7b0 100644
+--- a/home/.zshrc
++++ b/home/.zshrc
+@@ -35,6 +35,7 @@ alias qlook='qlmanage -p'
+ alias sudoedit='sudo -e'
+ autoload -Uz zmv
+ autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
++autoload -Uz pyenv rbenv
+ 
+ #################
+ #  Directories  #
