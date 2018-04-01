@@ -15,7 +15,7 @@ path=(
   ~/.cargo/bin
   "$GEM_HOME/bin"
   "$(python3 -c 'import site; print(site.getuserbase())')/bin"
-  "$GOPATH/bin"
+  "$GOROOT/bin"
 )
 
 source ~/.nix-profile/etc/profile.d/nix.sh
