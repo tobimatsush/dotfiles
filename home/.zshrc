@@ -1,5 +1,6 @@
 fpath+=(~/.local/share/zsh/site-functions /usr/local/share/zsh-completions)
 autoload -Uz add-zsh-hook
+autoload -Uz is-at-least
 
 ###########################
 #  Environment Variables  #
@@ -34,6 +35,7 @@ alias la='ls -lAh'
 alias qlook='qlmanage -p'
 alias sudoedit='sudo -e'
 autoload -Uz zmv
+autoload -Uz cd.. fuck
 autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
 
 #################
@@ -51,9 +53,7 @@ zstyle ':chpwd:*' recent-dirs-default true
 #############
 #  History  #
 #############
-if [[ -z "$HISTFILE" ]]; then
-  HISTFILE=~/.zsh_history
-fi
+HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
 
@@ -83,6 +83,7 @@ zstyle ':completion:*' list-colors ''
 zstyle ':completion:*' menu select
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' recent-dirs-insert fallback
+zstyle ':completion:*:functions' ignored-patterns '_*'
 zstyle ':completion:*:*:kill:*:processes' list-colors \
   '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
 zstyle ':completion:*:*:*:*:processes' \
@@ -94,6 +95,7 @@ autoload -Uz compinit && compinit -C
 #################
 #  Keybindings  #
 #################
+autoload -Uz copy-earlier-word && zle -N copy-earlier-word
 autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz select-bracketed && zle -N select-bracketed
 autoload -Uz select-quoted && zle -N select-quoted
@@ -105,6 +107,7 @@ autoload -Uz fzf-cdr-widget && zle -N fzf-cdr-widget
 autoload -Uz fzf-file-widget && zle -N fzf-file-widget
 autoload -Uz fzf-history-widget && zle -N fzf-history-widget
 autoload -Uz fzf-snippet-expand && zle -N fzf-snippet-expand
+autoload -Uz fzf-snippet-next && zle -N fzf-snippet-next
 autoload -Uz surround \
   && zle -N delete-surround surround \
   && zle -N add-surround surround \
@@ -117,10 +120,11 @@ bindkey -v
 bindkey -rv '^[,' '^[/' '^[~'
 bindkey -v \
   '^A' smart-insert-last-word \
+  '^B' copy-earlier-word \
   '^Gu' split-undo \
   '^H' backward-delete-char \
   '^I' fzf-complete \
-  '^J' self-insert \
+  '^J' fzf-snippet-next \
   '^N' history-beginning-search-forward \
   '^O' fzf-cdr-widget \
   '^P' history-beginning-search-backward \
@@ -149,49 +153,54 @@ bindkey -M menuselect \
   '^X^F' accept-and-infer-next-history \
   '^X^X' vi-insert \
   '^?' undo
-for m in visual viopp; do
-  for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
-    bindkey -M $m $c select-bracketed
+
+local _mode _char
+for _mode in visual viopp; do
+  for _char in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+    bindkey -M $_mode $_char select-bracketed
   done
-  for c in {a,i}{\',\",\`}; do
-    bindkey -M $m $c select-quoted
+  for _char in {a,i}{\',\",\`}; do
+    bindkey -M $_mode $_char select-quoted
   done
 done
 
 ##########
 #  Misc  #
 ##########
+setopt interactive_comments
 setopt long_list_jobs
 setopt no_clobber
 setopt no_flowcontrol
 autoload -Uz select-word-style && select-word-style bash
-autoload -Uz url-quote-magic && zle -N self-insert url-quote-magic
 autoload -Uz zrecompile && zrecompile -p -R ~/.zshrc -- -M ~/.zcompdump
+autoload -Uz url-quote-magic && zle -N self-insert url-quote-magic
+if is-at-least 5.2; then
+  autoload -Uz bracketed-paste-url-magic && \
+    zle -N bracketed-paste bracketed-paste-url-magic
+fi
 
 # Tell Apple Terminal the working directory
 if [[ "$TERM_PROGRAM" == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]]; then
-  __update_terminal_cwd() {
-
-    # Percent-encode the pathname.
-    local URL_PATH=''
-    {
-      # Use LC_CTYPE=C to process text byte-by-byte.
-      local i ch hexch LC_CTYPE=C LC_ALL=
-      for ((i = 1; i <= ${#PWD}; ++i)); do
-        ch="$PWD[i]"
-        if [[ "$ch" =~ [/._~A-Za-z0-9-] ]]; then
-          URL_PATH+="$ch"
-        else
-          hexch=$(printf "%02X" "'$ch")
-          URL_PATH+="%$hexch"
-        fi
-      done
-    }
-
-    printf '\e]7;%s\a' "file://$HOST$URL_PATH"
+  __vte_urlencode() {
+    # Use LC_CTYPE=C to process text byte-by-byte.
+    local LC_CTYPE=C LC_ALL= _raw_url="$1" _safe_url="" _safe
+    while [[ -n "$_raw_url" ]]; do
+      _safe="${_raw_url%%[!a-zA-Z0-9/:_\.\-\!\'\(\)~]*}"
+      _safe_url+="$_safe"
+      _raw_url="${_raw_url#"$_safe"}"
+      if [[ -n "$_raw_url" ]]; then
+        _safe_url+="%$(([##16] #_raw_url))"
+        _raw_url="${_raw_url#?}"
+      fi
+    done
+    echo -E "$_safe_url"
   }
-  add-zsh-hook precmd __update_terminal_cwd
-  __update_terminal_cwd
+
+  __vte_osc7() {
+    printf "\e]7;file://%s%s\a" "$HOST" "$(__vte_urlencode "$PWD")"
+  }
+  add-zsh-hook precmd __vte_osc7
+  __vte_osc7
 fi
 
 ###########
@@ -204,6 +213,7 @@ setopt prompt_subst
 if [[ "$TERM" == "dumb" ]]; then
   PROMPT="%n: %~%# "
   unset zle_bracketed_paste
+  bindkey -v '^J' accept-line
   return
 fi
 
@@ -218,25 +228,29 @@ zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' enable git
 
 __update_prompt() {
-  local prompt_prompt="%(?::%F{red})%#%f"
-  local prompt_login="%B%(!:%F{red}:)"
-  local prompt_hname=""
+  local _prompt="%(?::%F{red})%#%f" _login="%B%(!:%F{red}:)" _hname=""
   if [[ -n "$SSH_CONNECTION" ]]; then
-    prompt_login="%B%(!:%F{red}:%F{green})"
-    prompt_hname="@%m"
+    _login="%B%(!:%F{red}:%F{green})"
+    _hname="@%m"
+  fi
+
+  local _begin= _end=
+  if zstyle -T ':iterm2:osc' enable; then
+    _begin=$'%{\e]133;D;%?\a\e]133;A\a%}'
+    _end=$'%{\e]133;B\a%}'
   fi
 
   vcs_info
   if [[ -n "$vcs_info_msg_0_" ]]; then
-    PROMPT="$prompt_login$vcs_info_msg_0_"$'\n'"$prompt_prompt%b "
+    PROMPT="$_begin$_login$vcs_info_msg_0_"$'\n'"$_prompt%b $_end"
     RPROMPT="$vcs_info_msg_1_"
   else
-    PROMPT="$prompt_login%n$prompt_hname%f: %F{blue}%~%f"$'\n'"$prompt_prompt%b "
+    PROMPT="$_begin$_login%n$_hname%f: %F{blue}%~%f"$'\n'"$_prompt%b $_end"
     RPROMPT=""
   fi
 }
 
-__update_title() {
+__update_term() {
   if [[ -n "$SSH_CONNECTION" ]]; then
     print -Pn "\e]0;%m: %1~\a"
   else
@@ -244,18 +258,23 @@ __update_title() {
     [[ "$TERM_PROGRAM" != "Apple_Terminal" ]] && title="%1~"
     print -Pn "\e]0;$title\a"
   fi
+
+  if zstyle -T ':iterm2:osc' enable; then
+    printf "\e]1337;RemoteHost=%s@%s\a\e]1337;CurrentDir=%s\a\e]133;C\a" \
+      "$USER" "$HOST" "$PWD"
+  fi
 }
 
 add-zsh-hook precmd __update_prompt
-add-zsh-hook preexec __update_title
+add-zsh-hook preexec __update_term
 
 case "$TERM" in
   xterm-256color|screen-256color)
     __vi_cursor() {
-      local cursor_shape=6
-      [[ "$ZLE_STATE" == *overwrite* ]] && cursor_shape=4
-      [[ "$KEYMAP" == vicmd ]] && cursor_shape=2
-      print -Pn "\e[$cursor_shape q"
+      local _shape=6
+      [[ "$ZLE_STATE" == *overwrite* ]] && _shape=4
+      [[ "$KEYMAP" == vicmd ]] && _shape=2
+      print -Pn "\e[$_shape q"
     }
 
     __reset_cursor() {

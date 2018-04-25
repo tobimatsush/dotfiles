@@ -101,6 +101,7 @@ setup::misc() {
   install::default ".local/bin/rmpkg"
   install::default ".local/bin/imgcat"
   install::default ".local/opt/fzftools"
+  install::default ".local/opt/tmux-copycat"
   install::default ".nanorc"
   install::default ".screenrc"
   install::default ".tern-config"
