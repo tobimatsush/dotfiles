@@ -87,6 +87,7 @@ setup::misc() {
   install::default ".local/opt/gef"
   install::default ".local/opt/peda"
   install::default ".local/opt/pwndbg"
+  install::default ".local/opt/tmux-copycat"
   install::default ".nixpkgs/config.nix"
   install::default ".screenrc"
   install::default ".tern-config"
