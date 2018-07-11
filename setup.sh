@@ -1,7 +1,18 @@
 #!/bin/bash
 
 DOTFILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOGFILE="$(mktemp)"
 [[ -z "$DOTFILE_DIR" ]] && DOTFILE_DIR=~/Library/dotfiles
+
+
+cleanup() {
+  if [[ -s "$LOGFILE" ]]; then
+    echo "$(tput bold)== Printing logs ==$(tput sgr0)"
+    cat "$LOGFILE"
+  fi
+  rm "$LOGFILE"
+}
+trap cleanup EXIT
 
 main() {
   local install_deps=""
@@ -19,6 +30,9 @@ main() {
 
   echo "$(tput bold)== Updating submodules ==$(tput sgr0)"
   git submodule update --init --remote
+
+  echo "$(tput bold)== Pruning dead symlinks ==$(tput sgr0)"
+  setup::prune
 
   echo "$(tput bold)== Installing configuration ==$(tput sgr0)"
   setup::shell
@@ -50,29 +64,30 @@ setup::shell() {
 }
 
 setup::vim() {
-  install::default ".vimrc"
-  install::default ".gvimrc"
   install::default ".vim"
   install::default ".config/nvim"
   curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-  local mvim_dir=/usr/local/bin
+  setup::vim::macvim
+}
+
+setup::vim::macvim() {
+  local mvim_bin=/Applications/MacVim.app/Contents/bin/mvim
+  local dst_dir=/usr/local/bin
+
+  [[ -x "$mvim_bin" ]] || return
+  echo -n "Installing $dst_dir/mvim..."
+  install::_ln "$mvim_bin" "$dst_dir/mvim"
+  print_badge
+
   local old_pwd="$(pwd)"
-  cd "$mvim_dir"
-  if [[ -x "$mvim_dir/mvim" ]]; then
-    ln -s mvim vi
-    ln -s mvim view
-    ln -s mvim vim
-    ln -s mvim vimdiff
-    ln -s mvim vimex
-  else
-    [[ -e vi ]] || rm vi
-    [[ -e view ]] || rm view
-    [[ -e vim ]] || rm vim
-    [[ -e vimdiff ]] || rm vimdiff
-    [[ -e vimex ]] || rm vimex
-  fi
+  cd "$dst_dir"
+  for item in vi view vim vimdiff vimex; do
+    echo -n "Setting $item to mvim..."
+    install::_ln mvim "$item"
+    print_badge
+  done
   cd "$old_pwd"
 }
 
@@ -107,6 +122,7 @@ setup::misc() {
   install::default ".tern-config"
   install::default ".tmux.conf"
   install::default ".wgetrc"
+  install::default "Library/Application Support/AquaSKK/keymap.conf"
 
   # gtk
   install::default ".gtkrc-2.0"
@@ -126,7 +142,15 @@ setup::misc() {
   chmod 700 ~/Library/Application\ Support/Code
 }
 
-setup::plugins() {
+setup::prune() {
+  prune ".gitconfig"
+  prune ".latexmkrc"
+  prune ".vimrc"
+  prune ".gvimrc"
+  prune ".config/shell/common.snip"
+}
+
+setup::deps() {
   brew update
   brew install \
     cmake \
@@ -147,14 +171,45 @@ setup::plugins() {
 
 # Print an error message and exit
 # Arguments:
-#   error_message [default: abort]
+#   error_message
 # Returns:
 #   None
 abort() {
-  local message="abort"
+  local message=""
   [[ -n "$1" ]] && message="$1"
-  printf "[%s():%s] %s\n" "${FUNCNAME[1]}" "${BASH_LINENO[0]}" "$message" >&2
+  printf "%s():%s [ABORT] %s\n" "${FUNCNAME[1]}" "${BASH_LINENO[0]}" "$message" >&2
   exit 1
+}
+
+# Indicate whether the last command succeeded
+# Arguments:
+#   None
+# Returns:
+#   None
+print_badge() {
+  if [[ "$?" == 0 ]]; then
+    print_badge::ok
+  else
+    print_badge::failed
+  fi
+}
+
+# Indicate success
+# Arguments:
+#   None
+# Returns:
+#   None
+print_badge::ok() {
+  echo "[$(tput setaf 2)OK$(tput sgr0)]"
+}
+
+# Indicate failure
+# Arguments:
+#   None
+# Returns:
+#   None
+print_badge::failed() {
+  echo "[$(tput setaf 1)FAILED$(tput sgr0)]"
 }
 
 # Prints the relative path from the current directory to the given path
@@ -183,6 +238,22 @@ relative_path() {
   fi
 }
 
+# Removes ~/$path_to_file if it is a dead symlink
+# Arguments:
+#   path_to_file : file to prune
+# Returns:
+#   None
+prune() {
+  [[ "$#" != 1 ]] && abort "Wrong number of arguments."
+  [[ "$1" == /* ]] && abort "Cannot use absoulte path."
+
+  echo -n "Pruning $1..."
+
+  local filepath=~/"$1"
+  [[ ! -L "$filepath" || -e "$filepath" ]] || rm "$filepath" >>"$LOGFILE" 2>&1
+  print_badge
+}
+
 # Creates an symlink from $DOTFILE_DIR/home/$path_to_file to ~/$path_to_file
 # Globals:
 #   DOTFILE_DIR
@@ -191,12 +262,15 @@ relative_path() {
 # Returns:
 #   None
 install::default() {
-  echo "Installing $1"
-
   [[ "$#" != 1 ]] && abort "Wrong number of arguments."
   [[ "$1" == /* ]] && abort "Cannot use absoulte path."
-  [[ ! -e "$DOTFILE_DIR/home/$1" ]] &&
-    abort "$DOTFILE_DIR/home/$1 does not exist."
+
+  echo -n "Installing $1..."
+  if [[ ! -e "$DOTFILE_DIR/home/$1" ]]; then
+    echo "$DOTFILE_DIR/home/$1 does not exist" >>"$LOGFILE"
+    print_badge::failed
+    return
+  fi
 
   local dir="$(dirname "$1")"
   local old_pwd="$(pwd)"
@@ -207,8 +281,29 @@ install::default() {
     cd
   fi
 
-  ln -s "$(relative_path "$DOTFILE_DIR/home/$1")" .
+  local fname="$(basename "$1")"
+  local src="$DOTFILE_DIR/home/$1"
+  install::_ln "$(relative_path "$src")" "$fname"
+  print_badge
+
   cd "$old_pwd"
+}
+
+# Creates an symlink from $src to $dst
+# Arguments:
+#   src : source path
+#   dst : destination path
+# Returns:
+#   None
+install::_ln() {
+  [[ "$#" != 2 ]] && abort "Wrong number of arguments."
+  local src="$1"
+  local dst="$2"
+
+  # remove dead symlink
+  [[ ! -L "$dst" || -e "$dst" ]] || rm "$dst" >>"$LOGFILE" 2>&1
+  # install symlink
+  [[ "$dst" -ef "$src" ]] || ln -s "$src" "$dst" >>"$LOGFILE" 2>&1
 }
 
 main "$@"
