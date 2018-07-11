@@ -63,9 +63,12 @@ set fileencodings=ucs-bom,utf-8,iso-2022-jp,euc-jp,cp932,default,latin1
 set fileformats=unix,dos,mac
 set backspace=indent,eol,start
 set expandtab
+set smarttab
 set shiftwidth=4
 set softtabstop=4
 set autoindent
+set copyindent
+set preserveindent
 set formatoptions+=jmB
 
 " jump to the last known cursor position
@@ -74,10 +77,90 @@ au vimrc BufReadPost *
   \ |   exe "normal! g`\""
   \ | endif
 
+" enable brackted paste mode
+if !has('nvim') && has('patch-8.0.0238') && $TERM =~? 'screen'
+  let &t_BE = "\<Esc>[?2004h"
+  let &t_BD = "\<Esc>[?2004l"
+  exec "set t_PS=\<ESC>[200~ | set t_PE=\<ESC>[201~"
+endif
+
 """"""""
 "  UI  "
 """"""""
-set let maplocalleader="\<Space>\<Space>"
+set colorcolumn=81
+set number
+set ruler
+set showcmd
+set noshowmode
+set cmdheight=1
+set laststatus=2
+set display=lastline
+set lazyredraw
+set showmatch
+set wildmenu
+set wildignorecase
+set nofoldenable
+set title
+set mouse=a
+
+" colors
+if $TERM =~? '.*-256color' && has('termguicolors')
+  set cursorline
+  set termguicolors
+  colorscheme molokai
+  if !has('nvim') && $TERM =~? 'screen'
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  endif
+endif
+
+" cursor shape
+if !has('nvim') && $TERM =~? '\(xterm\|screen\)'
+  let &t_SI = "\<Esc>[6 q"
+  let &t_SR = "\<Esc>[4 q"
+  let &t_EI = "\<Esc>[2 q"
+endif
+
+if exists('+inccommand')
+  set inccommand=split
+endif
+
+" show whitespace errors
+hi link WhitespaceError Error
+au vimrc Syntax * syn match WhitespaceError /\s\+$\| \+\ze\t/
+
+""""""""""""
+"  Search  "
+""""""""""""
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+set wrapscan
+set tags=./tags;,tags
+
+"""""""""""
+"  Cache  "
+"""""""""""
+if !has('nvim')
+  set viminfo+=n~/.cache/vim/viminfo
+endif
+set dir=~/.cache/vim/swap//
+set backup
+set backupdir=~/.cache/vim/backup
+set undofile
+set undodir=~/.cache/vim/undo
+for s:d in [&dir, &backupdir, &undodir]
+  if !isdirectory(s:d)
+    call mkdir(iconv(s:d, &encoding, &termencoding), 'p')
+  endif
+endfor
+
+"""""""""""""""""
+"  Keybindings  "
+"""""""""""""""""
+let mapleader="\<Space>"
+let maplocalleader="\<Space>\<Space>"
 " XXX: Workaround for <Nop> bug in vim/vim#1548, neovim/neovim#6241
 nnoremap <Space> \
 xnoremap <Space> \
@@ -97,14 +180,27 @@ onoremap <silent> <Leader>fc /\v^[<=>]{7}( .*<Bar>$)<CR>
 nnoremap <silent> <Leader>f<Space> /\s\+$\<Bar> \+\ze\t<CR>
 xnoremap <silent> <Leader>f<Space> /\s\+$\<Bar> \+\ze\t<CR>
 onoremap <silent> <Leader>f<Space> /\s\+$\<Bar> \+\ze\t<CR>
+" find full-width punctuation marks
+nnoremap <silent> <Leader>f. /\v(\.<Bar>．<Bar>。)<CR>
+xnoremap <silent> <Leader>f. /\v(\.<Bar>．<Bar>。)<CR>
+onoremap <silent> <Leader>f. /\v(\.<Bar>．<Bar>。)<CR>
+nnoremap <silent> <Leader>f, /\v(,<Bar>，<Bar>、)<CR>
+xnoremap <silent> <Leader>f, /\v(,<Bar>，<Bar>、)<CR>
+onoremap <silent> <Leader>f, /\v(,<Bar>，<Bar>、)<CR>
+nnoremap <silent> <Leader>f! /\v(!<Bar>！)<CR>
+xnoremap <silent> <Leader>f! /\v(!<Bar>！)<CR>
+onoremap <silent> <Leader>f! /\v(!<Bar>！)<CR>
+nnoremap <silent> <Leader>f? /\v(\?<Bar>？)<CR>
+xnoremap <silent> <Leader>f? /\v(\?<Bar>？)<CR>
+onoremap <silent> <Leader>f? /\v(\?<Bar>？)<CR>
 
 " text objects
-xnoremap <silent> ae gg0oG$
-onoremap <silent> ae :<C-u>exe "normal! m`"<Bar>keepjumps normal! ggVG<CR>
 xnoremap <silent> al <Esc>0v$
 onoremap <silent> al :<C-u>normal! 0v$<CR>
 xnoremap <silent> il <Esc>^vg_
 onoremap <silent> il :<C-u>normal! ^vg_<CR>
+xnoremap <silent> a, gg0oG$
+onoremap <silent> a, :<C-u>exe "normal! m`"<Bar>keepjumps normal! ggVG<CR>
 " XXX: Same feature as vim/vim#958
 xmap im <Plug>(textobj-sandwich-literal-query-i)
 omap im <Plug>(textobj-sandwich-literal-query-i)
@@ -113,13 +209,16 @@ omap am <Plug>(textobj-sandwich-literal-query-a)
 
 " toggles
 nnoremap <silent> <Leader>tf :NERDTreeToggle<CR>
+nnoremap <silent> <Leader>th :setlocal bufhidden! bufhidden?<CR>
 nnoremap <silent> <Leader>tl :ALEToggle<CR>
 nnoremap <silent> <Leader>ts :setlocal spell! spell?<CR>
 nnoremap <silent> <Leader>tt :TagbarToggle<CR>
 nnoremap <silent> <Leader>tu :UndotreeToggle<CR>
 nnoremap <silent> <Leader>tv :call vimrc#toggle_virtualedit()<CR>
 nnoremap <silent> <Leader>t# :setlocal relativenumber! relativenumber?<CR>
+nnoremap <silent> <Leader>t* :call vimrc#toggle_recursive_path()<CR>
 nnoremap <silent> <Leader>t<Space> :AirlineToggleWhitespace<CR>
+nnoremap <silent> <Leader>t<Tab> :setlocal list! list?<CR>
 
 " FZF mappings
 imap <C-x><C-x><C-f> <Plug>(fzf-complete-path)
@@ -161,6 +260,11 @@ xmap g= <Plug>(EasyAlign)
 nmap s <Nop>
 xmap s <Nop>
 
+" youcompleteme
+nnoremap <silent> <LocalLeader>K :YcmCompleter GetDoc<CR>
+nnoremap <silent> <LocalLeader>[i :YcmCompleter GetType<CR>
+nnoremap <silent> <LocalLeader><C-]> :YcmCompleter GoTo<CR>
+
 """"""""""
 "  Misc  "
 """"""""""
@@ -197,7 +301,7 @@ let g:EasyMotion_do_mapping=0
 let g:EasyMotion_smartcase=1
 let g:EasyMotion_use_migemo=1
 
-" EditorConfig
+" EditorConfig "
 let g:EditorConfig_exclude_patterns=['fugitive://.*', '\(M\|m\|GNUm\)akefile']
 
 " UltiSnips "
@@ -207,6 +311,7 @@ let g:UltiSnipsExpandTrigger='<C-x><C-j>'
 let g:ycm_key_list_select_completion=[]
 let g:ycm_key_list_previous_completion=[]
 let g:ycm_key_invoke_completion=''
+let g:ycm_extra_conf_vim_data=['&filetype']
 let g:ycm_global_ycm_extra_conf='~/.vim/ycm_extra_conf.py'
 let g:ycm_rust_src_path='~/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src'
 
