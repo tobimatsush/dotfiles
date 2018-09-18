@@ -99,10 +99,10 @@ def GuessFlagsForFile( filename, filetype, flags=[] ):
   # relevant for c++ headers.
   # For a C project, you would set this to 'c' instead of 'c++'.
   LANGS = {
-    'c': { 'flags': [ '-xc', '--std=c11' ], 'ext': [ '.c' ] },
-    'cpp': { 'flags': [ '-xc++', '--std=c++14' ],
+    'c': { 'flags': [ '-xc', '--std=gnu11' ], 'ext': [ '.c' ] },
+    'cpp': { 'flags': [ '-xc++', '--std=gnu++14' ],
              'ext': [ '.cpp', '.cxx', '.cc' ] },
-    'cuda': { 'flags': [ '-xcuda', '--std=c++14' ], 'ext': [ '.cu', '.cuh' ] },
+    'cuda': { 'flags': [ '-xcuda', '--std=gnu++14' ], 'ext': [ '.cu', '.cuh' ] },
     'objc': { 'flags': [ '-xobjective-c' ], 'ext': [ '.m' ] },
     'objcpp': { 'flags': [ '-xobjective-c++' ], 'ext': [ '.mm' ] },
   }
@@ -118,14 +118,13 @@ def GuessFlagsForFile( filename, filetype, flags=[] ):
   return LANGS.get( filetype, LANGS[ 'cpp' ] )[ 'flags' ] + flags
 
 
-# This is the entry point; this function is called by ycmd to produce flags for
-# a file.
-def FlagsForFile( filename, **kwargs ):
+def CFamilySettings( **kwargs ):
+  filename = kwargs[ 'filename' ]
+
   if not database:
     filetype = None
-    client_data = kwargs.get( 'client_data' )
-    if client_data:
-      filetype = client_data.get( '&filetype' )
+    client_data = kwargs[ 'client_data' ]
+    filetype = client_data.get( '&filetype' )
     return {
       'flags': GuessFlagsForFile( filename, filetype, flags ),
       'include_paths_relative_to_dir': DirectoryOfThisScript()
@@ -141,5 +140,24 @@ def FlagsForFile( filename, **kwargs ):
     'flags': list( compilation_info.compiler_flags_ ),
     'include_paths_relative_to_dir': compilation_info.compiler_working_dir_
   }
+
+
+def PythonSettings( **kwargs ):
+  client_data = kwargs[ 'client_data' ]
+  return {
+    'interpreter_path': client_data[ 'g:ycm_python_interpreter_path' ],
+    'sys_path': client_data[ 'g:ycm_python_sys_path' ]
+  }
+
+
+# This is the entry point; this function is called by ycmd to produce flags for
+# a file.
+def Settings( **kwargs ):
+  language = kwargs[ 'language' ]
+  if language == 'cfamily':
+    return CFamilySettings( **kwargs )
+  elif language == 'python':
+    return PythonSettings( **kwargs )
+  return {}
 
   # vim:set et sw=2:
