@@ -26,15 +26,18 @@ Plug 'tpope/vim-fugitive'
 Plug 'machakann/vim-highlightedyank'
 Plug 'junegunn/vim-peekaboo'
 Plug 'mhinz/vim-signify'
-Plug 'majutsushi/tagbar'
 Plug 'junegunn/gv.vim', {'on': 'GV'}
-Plug 'scrooloose/nerdtree', {'on': 'NERDTreeToggle'}
+Plug 'Yggdroot/indentLine', {'on': 'IndentLinesEnable'}
+Plug 'Yilin-Yang/vim-markbar', {'on': '<Plug>ToggleMarkbar'}
+Plug 'scrooloose/nerdtree', {'on': ['NERDTreeToggle', 'NERDTreeFind']}
+Plug 'CoatiSoftware/vim-sourcetrail', {'for': ['c', 'cpp', 'cuda', 'java']}
+Plug 'majutsushi/tagbar', {'on': 'TagbarToggle'}
 Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
 
 " colorschemes
-Plug 'tomasr/molokai'
-Plug 'altercation/vim-colors-solarized'
+Plug 'morhetz/gruvbox'
+Plug 'midchildan/molokai'
 
 " filetypes
 Plug 'fatih/vim-go', {'for': 'go'}
@@ -104,14 +107,17 @@ set title
 set mouse=a
 
 " colors
-if $TERM =~? '.*-256color' && $TERM_PROGRAM !=? 'Apple_Terminal'
-  set cursorline
-  set termguicolors
-  colorscheme molokai
-  if !has('nvim') && $TERM =~? 'screen'
-    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+if $TERM =~? '.*-256color'
+  if $TERM_PROGRAM !=? 'Apple_Terminal'
+    set termguicolors
+    if !has('nvim') && $TERM =~? 'screen'
+      let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+      let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    endif
   endif
+  set cursorline
+  set background=dark
+  colorscheme gruvbox
 endif
 
 " cursor shape
@@ -193,6 +199,8 @@ onoremap <silent> <Leader>f! /\v(!<Bar>！)<CR>
 nnoremap <silent> <Leader>f? /\v(\?<Bar>？)<CR>
 xnoremap <silent> <Leader>f? /\v(\?<Bar>？)<CR>
 onoremap <silent> <Leader>f? /\v(\?<Bar>？)<CR>
+" NERDTreeFind
+nnoremap <silent> <Leader>ff :NERDTreeFind<CR>
 
 " text objects
 xnoremap <silent> al <Esc>0v$
@@ -208,6 +216,7 @@ xmap am <Plug>(textobj-sandwich-literal-query-a)
 omap am <Plug>(textobj-sandwich-literal-query-a)
 
 " toggles
+nmap <Leader>tm <Plug>ToggleMarkbar
 nnoremap <silent> <Leader>tf :NERDTreeToggle<CR>
 nnoremap <silent> <Leader>th :setlocal bufhidden! bufhidden?<CR>
 nnoremap <silent> <Leader>tl :ALEToggle<CR>
@@ -218,7 +227,7 @@ nnoremap <silent> <Leader>tv :call vimrc#toggle_virtualedit()<CR>
 nnoremap <silent> <Leader>t# :setlocal relativenumber! relativenumber?<CR>
 nnoremap <silent> <Leader>t* :call vimrc#toggle_recursive_path()<CR>
 nnoremap <silent> <Leader>t<Space> :AirlineToggleWhitespace<CR>
-nnoremap <silent> <Leader>t<Tab> :setlocal list! list?<CR>
+nnoremap <silent> <Leader>t<Tab> :call vimrc#toggle_show_whitespace()<CR>
 
 " FZF mappings
 imap <C-x><C-x><C-f> <Plug>(fzf-complete-path)
@@ -331,6 +340,14 @@ let g:airline_skip_empty_sections=1
 if $USE_POWERLINE
   let g:airline_powerline_fonts=1
 endif
+
+" indentLine "
+let g:indentLine_enabled=0
+let g:indentLine_setColors=0
+let g:indentLine_concealcursor=''
+
+" markbar "
+let g:markbar_enable_peekaboo=v:false
 
 " undotree "
 let g:undotree_WindowLayout=2
