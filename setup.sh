@@ -2,6 +2,7 @@
 
 DOTFILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOGFILE="$(mktemp)"
+LN_FLAGS=""
 [[ -z "$DOTFILE_DIR" ]] && DOTFILE_DIR=~/.config/dotfiles
 
 
@@ -18,6 +19,9 @@ main() {
   local install_deps=""
   for n in "$@"; do
     case "$n" in
+      -f)
+        LN_FLAGS+="f"
+        ;;
       --install-deps)
         install_deps=yes
         ;;
@@ -131,6 +135,7 @@ setup::prune() {
   prune ".vimrc"
   prune ".gvimrc"
   prune ".config/shell/common.snip"
+  prune ".mikutter/plugin"
   prune ".nixpkgs/config.nix"
 }
 
@@ -287,7 +292,7 @@ install::_ln() {
   # remove dead symlink
   [[ ! -L "$dst" || -e "$dst" ]] || rm "$dst" >>"$LOGFILE" 2>&1
   # install symlink
-  [[ "$dst" -ef "$src" ]] || ln -s "$src" "$dst" >>"$LOGFILE" 2>&1
+  [[ "$dst" -ef "$src" ]] || ln -s"$LN_FLAGS" "$src" "$dst" >>"$LOGFILE" 2>&1
 }
 
 main "$@"

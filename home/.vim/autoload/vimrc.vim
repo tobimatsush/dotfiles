@@ -27,6 +27,18 @@ func! vimrc#fzf_compilers(is_buffer, bang)
   \}, a:bang))
 endf
 
+func! vimrc#toggle_show_whitespace()
+  if &list
+    if exists(':IndentLinesDisable')
+      IndentLinesDisable
+    endif
+    setlocal nolist nocursorcolumn list?
+  else
+    IndentLinesEnable
+    setlocal list cursorcolumn list?
+  endif
+endf
+
 func! vimrc#toggle_recursive_path()
   if index(split(&path, ','), '**') >= 0
     set path-=** path?
