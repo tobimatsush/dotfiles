@@ -16,7 +16,7 @@ path=(
   ~/.cargo/bin
   "$GEM_HOME/bin"
   "$(python3 -c 'import site; print(site.getuserbase())')/bin"
-  "$GOROOT/bin"
+  "$GOPATH/bin"
 )
 
 if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then

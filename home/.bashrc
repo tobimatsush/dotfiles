@@ -14,7 +14,7 @@ PATH="$HOME/.local/bin:$PATH"
 PATH+=":$HOME/.cargo/bin"
 PATH+=":$GEM_HOME/bin"
 PATH+=":$(python3 -c 'import site; print(site.getuserbase())')/bin"
-PATH+=":$GOROOT/bin"
+PATH+=":$GOPATH/bin"
 export PATH
 
 if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
