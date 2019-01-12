@@ -2,7 +2,6 @@
 	name = tobimatsush
 	email = tobimatsush@gmail.com
         signingkey = 0x8ABC1E9EB3BF5295
-[push]
 	default = simple
 [merge]
 	tool = vimdiff
