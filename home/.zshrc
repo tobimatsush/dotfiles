@@ -22,6 +22,10 @@ path=(
   "$GOPATH/bin"
 )
 
+if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
+  source ~/.nix-profile/etc/profile.d/nix.sh
+fi
+
 ###########################
 #  Aliases and Functions  #
 ###########################
@@ -89,8 +93,14 @@ zstyle ':completion:*:*:kill:*:processes' list-colors \
 zstyle ':completion:*:*:*:*:processes' \
   command "ps -u `whoami` -o pid,user,comm -w -w"
 
-# skip the slooow security checks (-C), it's pointless in a single-user setup
-autoload -Uz compinit && compinit -C
+autoload -Uz compinit
+# update the completion cache only once a day
+if [[ -f ~/.zcompdump(#qN.m+1) ]]; then
+  # XXX: skip the slooow security checks; it's pointless in a single-user setup
+  compinit -u
+else
+  compinit -C
+fi
 
 #################
 #  Keybindings  #
@@ -174,7 +184,7 @@ setopt long_list_jobs
 setopt no_clobber
 setopt no_flowcontrol
 autoload -Uz select-word-style && select-word-style bash
-autoload -Uz zrecompile && zrecompile -p -R ~/.zshrc -- -M ~/.zcompdump
+autoload -Uz zrecompile && zrecompile -p -R ~/.zshrc -- -M ~/.zcompdump &!
 autoload -Uz url-quote-magic && zle -N self-insert url-quote-magic
 if is-at-least 5.2; then
   autoload -Uz bracketed-paste-url-magic && \
@@ -208,8 +218,6 @@ fi
 ###########
 #  Theme  #
 ###########
-setopt prompt_subst
-
 [[ -z "$TERM_PROGRAM" ]] && USE_POWERLINE=0
 
 if [[ "$TERM" == "dumb" ]]; then
@@ -219,38 +227,8 @@ if [[ "$TERM" == "dumb" ]]; then
   return
 fi
 
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' actionformats \
-  '%b@%s%f: %F{blue}%r/%S%f' '[%F{red}%a%f]%c%u'
-zstyle ':vcs_info:*' formats \
-  '%b@%s%f: %F{blue}%r/%S%f' '%c%u'
-zstyle ':vcs_info:*' stagedstr "[%B%F{yellow}staged%f%b]"
-zstyle ':vcs_info:*' unstagedstr "[%B%F{red}unstaged%f%b]"
-zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' enable git
-
-__update_prompt() {
-  local _prompt="%(?::%F{red})%#%f" _login="%B%(!:%F{red}:)" _hname=""
-  if [[ -n "$SSH_CONNECTION" ]]; then
-    _login="%B%(!:%F{red}:%F{green})"
-    _hname="@%m"
-  fi
-
-  local _begin= _end=
-  if zstyle -T ':iterm2:osc' enable; then
-    _begin=$'%{\e]133;D;%?\a\e]133;A\a%}'
-    _end=$'%{\e]133;B\a%}'
-  fi
-
-  vcs_info
-  if [[ -n "$vcs_info_msg_0_" ]]; then
-    PROMPT="$_begin$_login$vcs_info_msg_0_"$'\n'"$_prompt%b $_end"
-    RPROMPT="$vcs_info_msg_1_"
-  else
-    PROMPT="$_begin$_login%n$_hname%f: %F{blue}%~%f"$'\n'"$_prompt%b $_end"
-    RPROMPT=""
-  fi
-}
+autoload -Uz promptinit && promptinit
+prompt essence
 
 __update_term() {
   if [[ -n "$SSH_CONNECTION" ]]; then
@@ -262,13 +240,12 @@ __update_term() {
   fi
 
   if zstyle -T ':iterm2:osc' enable; then
-    printf "\e]1337;RemoteHost=%s@%s\a\e]1337;CurrentDir=%s\a\e]133;C\a" \
+    printf "\e]1337;RemoteHost=%s@%s\a\e]1337;CurrentDir=%s\a" \
       "$USER" "$HOST" "$PWD"
   fi
 }
 
-add-zsh-hook precmd __update_prompt
-add-zsh-hook preexec __update_term
+add-zsh-hook precmd __update_term
 
 case "$TERM" in
   xterm-256color|screen-256color)

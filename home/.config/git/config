@@ -2,14 +2,20 @@
 	name = tobimatsush
 	email = tobimatsush@gmail.com
         signingkey = 0x8ABC1E9EB3BF5295
+[core]
+	# consider installing a newer version of less to avoid annoyances
+	# https://unix.stackexchange.com/q/107315
+	pager = less -FX
+[push]
 	default = simple
 [merge]
 	tool = vimdiff
+[rebase]
+	autosquash = true
 [commit]
 	gpgsign = true
 [alias]
 	exec = "!exec " # run a shell command from the top directory
-	fancy = "!~/.local/libexec/diff-so-fancy/git-fancy "
 [merge "ours"]
 	driver = true
 [protocol "keybase"]
