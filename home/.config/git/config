@@ -6,11 +6,12 @@
 	default = simple
 [merge]
 	tool = vimdiff
+[rebase]
+	autosquash = true
 [commit]
 	gpgsign = true
 [alias]
 	exec = "!exec " # run a shell command from the top directory
-	fancy = "!~/.local/libexec/diff-so-fancy/git-fancy "
 [merge "ours"]
 	driver = true
 [protocol "keybase"]
