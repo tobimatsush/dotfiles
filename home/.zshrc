@@ -14,7 +14,7 @@ path=(
   $path
   ~/.cargo/bin
   "$GEM_HOME/bin"
-  "$(python3 -c 'import site; print(site.getuserbase())')/bin"
+  "$(python -c 'import site; print(site.getuserbase())')/bin"
   "$GOPATH/bin"
 )
 
@@ -170,16 +170,6 @@ bindkey -M menuselect \
   '^X^F' accept-and-infer-next-history \
   '^X^X' vi-insert
 
-local _mode _char
-for _mode in visual viopp; do
-  for _char in {a,i}${(s..)^:-'()[]{}<>bB'}; do
-    bindkey -M $_mode $_char select-bracketed
-  done
-  for _char in {a,i}{\',\",\`}; do
-    bindkey -M $_mode $_char select-quoted
-  done
-done
-
 ######################
 #  Terminal Support  #
 ######################
@@ -243,7 +233,6 @@ if is-at-least 5.2; then
 fi
 
 command -v lesspipe >/dev/null 2>&1 && eval "$(SHELL=/bin/sh lesspipe)"
-source /etc/zsh_command_not_found
 
 ###########
 #  Theme  #

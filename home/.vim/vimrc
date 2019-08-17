@@ -51,7 +51,7 @@ Plug 'lervag/vimtex'
 call plug#end()
 
 if !has('nvim')
-  packadd! matchit
+  runtime macros/matchit.vim
   runtime ftplugin/man.vim
 endif
 
@@ -138,7 +138,6 @@ endif
 " cursor shape
 if !has('nvim') && $TERM =~? '\(xterm\|screen\)'
   let &t_SI = "\<Esc>[6 q"
-  let &t_SR = "\<Esc>[4 q"
   let &t_EI = "\<Esc>[2 q"
 endif
 
@@ -371,7 +370,7 @@ let g:indentLine_setColors=0
 let g:indentLine_concealcursor=''
 
 " markbar "
-let g:markbar_enable_peekaboo=v:false
+let g:markbar_enable_peekaboo=0
 
 " undotree "
 let g:undotree_WindowLayout=2
