@@ -182,16 +182,8 @@ __term_support() {
   fi
 
   # report working directory
-  () {
-    setopt localoptions extended_glob no_multibyte
-    local match mbegin mend
-    local pattern="[^A-Za-z0-9_.!~*\'\(\)-\/]"
-    local unsafepwd=( ${(s::)PWD} )
-
-    # url encode
-    printf "\e]7;file://%s%s\a" \
-      "$HOST" ${(j::)unsafepwd/(#b)($~pattern)/%${(l:2::0:)$(([##16]#match))}}
-  }
+  # XXX: may not work well with Apple Terminal due to lack of url encoding
+  printf "\e]7;file://%s%s\a" "$HOST" "$PWD"
 
   # report current username to iTerm
   if zstyle -T ':iterm2:osc' enable; then
