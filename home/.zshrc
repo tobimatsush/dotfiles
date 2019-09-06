@@ -238,6 +238,8 @@ if [[ "$TERM" == "dumb" ]]; then
   return
 fi
 
+unset LS_COLORS # clear distro defaults
+
 autoload -Uz promptinit && promptinit
 prompt essence
 
