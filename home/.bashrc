@@ -9,7 +9,6 @@ esac
 export CLICOLOR=1
 export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
 export GPG_TTY="$(tty)"
-export USE_POWERLINE=0
 
 PATH="$HOME/.local/bin:/usr/local/opt/python/libexec/bin:/usr/local/sbin:$PATH"
 PATH+=":$HOME/.cargo/bin"
@@ -61,12 +60,12 @@ source ~/.local/opt/fzftools/fzftools.bash
 ###########
 #  Theme  #
 ###########
-[[ -z "$TERM_PROGRAM" ]] && USE_POWERLINE=0
-
 if [[ $TERM == "dumb" ]]; then
   PS1='\u@\h:\w\$ '
   return
 fi
+
+unset LS_COLORS # clear distro defaults
 
 __prompt_color='\[\e[1m\]'
 __prompt_login='\u'

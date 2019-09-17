@@ -5,7 +5,7 @@ source "$DOTFILE_DIR/scripts/setup"
 
 # Remove dead symlinks
 @clean
-  - gc: "${ENABLE_GC:-true}"
+  - gc: true
   # the rest of this section is kept for backwards compatibility
   - .gitconfig
   - .latexmkrc
@@ -15,7 +15,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .mikutter/plugin
 
 @install Update Submodules
-  - shell: git submodule update --init --remote
+  - shell: git submodule --quiet update --init --remote
 
 @install Install Shell Config
   - .bash_profile
@@ -88,15 +88,12 @@ source "$DOTFILE_DIR/scripts/setup"
   - .wgetrc
   - Library/Application\ Support/AquaSKK/keymap.conf
 
-# Will not run unless --install-deps is specified
+# Will not run unless --init is specified
 @packages
-  - skip: "${SKIP_PACKAGES:-true}"
+  - init: true
   - cmake
   - cmigemo
   - fzf
-  - node
-  - ripgrep
   - zsh-completions
   - zsh-syntax-highlighting
-  - script: https://sh.rustup.rs
   - shell: vim +PlugInstall +qall
