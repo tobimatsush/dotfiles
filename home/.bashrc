@@ -8,7 +8,6 @@ esac
 ###########################
 export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
 export GPG_TTY="$(tty)"
-export USE_POWERLINE=0
 
 PATH="$HOME/.local/bin:$PATH"
 PATH+=":$HOME/.cargo/bin"
@@ -84,20 +83,12 @@ fi
 ###########
 #  Theme  #
 ###########
-[[ -z "$DISPLAY$WAYLAND_DISPLAY$SSH_CONNECTION" ]] && USE_POWERLINE=0
-
 if [[ $TERM == "dumb" ]]; then
   PS1='\u@\h:\w\$ '
   return
 fi
 
-if command -v dircolors >/dev/null 2>&1; then
-  if [[ -r ~/.dircolors ]]; then
-    eval "$(dircolors -b ~/.dircolors)"
-  else
-    eval "$(dircolors -b)"
-  fi
-fi
+unset LS_COLORS # clear distro defaults
 
 __prompt_color='\[\e[1m\]'
 __prompt_login='\u'
