@@ -46,6 +46,7 @@ Plug 'fatih/vim-go', {'for': 'go', 'do': function('vimrc#plug#go'),
 Plug 'ledger/vim-ledger', {'for': 'ledger'}
 Plug 'LnL7/vim-nix', {'for': 'nix'}
 Plug 'rust-lang/rust.vim', {'for': 'rust'}
+Plug 'leafgarland/typescript-vim', {'for': 'ts'}
 Plug 'lervag/vimtex'
 
 " filetype plugin indent and syntax is handled by plug#end
