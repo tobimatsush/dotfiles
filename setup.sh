@@ -5,7 +5,7 @@ source "$DOTFILE_DIR/scripts/setup"
 
 # Remove dead symlinks
 @clean
-  - gc: "${ENABLE_GC:-true}"
+  - gc: true
   # the rest of this section is kept for backwards compatibility
   - .gitconfig
   - .latexmkrc
@@ -16,7 +16,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .nixpkgs/config.nix
 
 @install Update Submodules
-  - shell: git submodule update --init --remote
+  - shell: git submodule --quiet update --init --remote
 
 @install Install Shell Config
   - .bash_profile
@@ -43,7 +43,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/git/config
   - .config/git/ignore
   - .config/tig/config
-  - .local/libexec/diff-so-fancy/git-fancy
+  - .local/bin/git-fancy
 
 @install Install GPG Config
   - shell: install -d -m 700 ~/.gnupg
@@ -74,11 +74,14 @@ source "$DOTFILE_DIR/scripts/setup"
 
 @install Install Miscellaneous Config
   - .clang-format
+  - .editrc
+  - .ideavimrc
   - .config/bat/config
   - .config/nano/nanorc
   - .config/nixpkgs/config.nix
   - .config/ranger/rc.conf
   - .config/ranger/scope.sh
+  - .config/tilix/schemes/gruvbox-dark.json
   - .config/zathura/zathurarc
   - .ipython/profile_default/ipython_config.py
   - .local/libexec/fzf/install
@@ -91,15 +94,11 @@ source "$DOTFILE_DIR/scripts/setup"
   - .xprofile
   - .xmonad
 
-# Will not run unless --install-deps is specified
+# Will not run unless --init is specified
 @packages
-  - skip: "${SKIP_PACKAGES:-true}"
+  - init: true
   - build-essential
   - cmake
   - cmigemo
-  - npm
-  - nodejs
   - zsh-syntax-highlighting
-  - shell: sudo ln -s /usr/bin/nodejs /usr/local/bin/node
-  - script: https://sh.rustup.rs
   - shell: vim +PlugInstall +qall

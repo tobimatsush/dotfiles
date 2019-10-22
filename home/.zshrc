@@ -7,7 +7,6 @@ autoload -Uz is-at-least
 ###########################
 export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
 export GPG_TTY="$(tty)"
-export USE_POWERLINE=0
 
 typeset -U path
 path=(
@@ -18,10 +17,6 @@ path=(
   "$(python3 -c 'import site; print(site.getuserbase())')/bin"
   "$GOPATH/bin"
 )
-
-if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
-  source ~/.nix-profile/etc/profile.d/nix.sh
-fi
 
 ###########################
 #  Aliases and Functions  #
@@ -34,7 +29,7 @@ alias ll='ls -lh'
 alias la='ls -lAh'
 alias xmonad-replace='nohup xmonad --replace &> /dev/null &'
 autoload -Uz zmv
-autoload -Uz cd.. fuck
+autoload -Uz cud fuck
 autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
 
 #################
@@ -84,13 +79,25 @@ zstyle ':completion:*' menu select
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' recent-dirs-insert fallback
 zstyle ':completion:*:functions' ignored-patterns '_*'
+zstyle ':completion:*:manuals' separate-sections true
+zstyle ':completion:*:manuals.*' insert-sections true
 zstyle ':completion:*:*:kill:*:processes' list-colors \
   '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
 zstyle ':completion:*:*:*:*:processes' \
   command "ps -u `whoami` -o pid,user,comm -w -w"
 
-# skip the slooow security checks (-C), it's pointless in a single-user setup
-autoload -Uz compinit && compinit -C
+autoload -Uz compinit
+# update the completion cache only once a day
+if [[ -f ~/.zcompdump(#qN.m+1) ]]; then
+  # XXX: skip the slooow security checks; it's pointless in a single-user setup
+  compinit -u
+else
+  compinit -C
+fi
+
+# define a completion widget that parses --help output
+zle -C complete-from-help complete-word _generic
+zstyle ':completion:complete-from-help:*' completer _complete _gnu_generic
 
 #################
 #  Keybindings  #
@@ -100,6 +107,7 @@ autoload -Uz edit-command-line && zle -N edit-command-line
 autoload -Uz select-bracketed && zle -N select-bracketed
 autoload -Uz select-quoted && zle -N select-quoted
 autoload -Uz smart-insert-last-word && zle -N smart-insert-last-word
+autoload -Uz vim-pipe && zle -N vim-pipe
 autoload -Uz fzf-complete && zle -N fzf-complete
 autoload -Uz fzf-cd-widget && zle -N fzf-cd-widget
 autoload -Uz fzf-cdr-widget && zle -N fzf-cdr-widget
@@ -113,7 +121,9 @@ autoload -Uz surround \
   && zle -N change-surround surround
 autoload -Uz vim-incarg \
   && zle -N vim-incarg \
-  && zle -N vim-decarg vim-incarg
+  && zle -N vim-decarg vim-incarg \
+  && zle -N sync-incarg vim-incarg \
+  && zle -N sync-decarg vim-incarg
 
 unalias run-help 2>/dev/null
 autoload -Uz run-help run-help-git run-help-ip run-help-openssl run-help-sudo
@@ -134,27 +144,31 @@ bindkey -v \
   '^W' backward-kill-word \
   '^X^F' fzf-file-widget \
   '^X^J' fzf-snippet-expand \
+  '^X^O' complete-from-help \
   '^X^R' fzf-history-widget \
   '^?' backward-delete-char
 bindkey -ra 's'
 bindkey -a \
   'gf' fzf-cd-widget \
+  'g^A' sync-incarg \
+  'g^X' sync-decarg \
   'sa' add-surround \
   'sd' delete-surround \
   'sr' change-surround \
   'K' run-help \
   '^A' vim-incarg \
+  '^W' edit-command-line \
   '^X' vim-decarg \
-  '!' edit-command-line
+  '!' vim-pipe
 bindkey -M menuselect \
   '^B' backward-char \
   '^F' forward-char \
   '^J' accept-and-menu-complete \
   '^N' down-line-or-history \
   '^P' up-line-or-history \
+  '^U' undo \
   '^X^F' accept-and-infer-next-history \
-  '^X^X' vi-insert \
-  '^?' undo
+  '^X^X' vi-insert
 
 local _mode _char
 for _mode in visual viopp; do
@@ -166,6 +180,55 @@ for _mode in visual viopp; do
   done
 done
 
+######################
+#  Terminal Support  #
+######################
+__term_support() {
+  # set title
+  if [[ -n "$SSH_CONNECTION" ]]; then
+    print -Pn "\e]0;%m: %1~\a"
+  else
+    print -Pn "\e]0;%1~\a"
+  fi
+
+  # report working directory
+  () {
+    setopt localoptions extended_glob no_multibyte
+    local match mbegin mend
+    local pattern="[^A-Za-z0-9_.!~*\'\(\)-\/]"
+    local unsafepwd=( ${(s::)PWD} )
+
+    # url encode
+    printf "\e]7;file://%s%s\a" \
+      "$HOST" ${(j::)unsafepwd/(#b)($~pattern)/%${(l:2::0:)$(([##16]#match))}}
+  }
+
+  # report current username to iTerm
+  if zstyle -T ':iterm2:osc' enable; then
+    printf "\e]1337;RemoteHost=%s@\a" "$USER"
+  fi
+}
+
+__vi_cursor() {
+  local shape=6
+  [[ "$ZLE_STATE" == *overwrite* ]] && shape=4
+  [[ "$KEYMAP" == vicmd ]] && shape=2
+  print -Pn "\e[$shape q"
+}
+
+__reset_cursor() {
+  print -Pn "\e[2 q"
+}
+
+case "$TERM" in
+  xterm*|screen*|tmux*)
+    zle -N zle-line-init __vi_cursor
+    zle -N zle-keymap-select __vi_cursor
+    add-zsh-hook preexec __reset_cursor
+    add-zsh-hook precmd __term_support
+    ;;
+esac
+
 ##########
 #  Misc  #
 ##########
@@ -174,7 +237,7 @@ setopt long_list_jobs
 setopt no_clobber
 setopt no_flowcontrol
 autoload -Uz select-word-style && select-word-style bash
-autoload -Uz zrecompile && zrecompile -p -R ~/.zshrc -- -M ~/.zcompdump
+autoload -Uz zrecompile && zrecompile -pq -R ~/.zshrc -- -M ~/.zcompdump &!
 autoload -Uz url-quote-magic && zle -N self-insert url-quote-magic
 if is-at-least 5.2; then
   autoload -Uz bracketed-paste-url-magic && \
@@ -184,36 +247,9 @@ fi
 command -v lesspipe >/dev/null 2>&1 && eval "$(SHELL=/bin/sh lesspipe)"
 source /etc/zsh_command_not_found
 
-# Tell libvte terminals the working directory
-if (( ${VTE_VERSION:-0} >= 3405 )); then
-  __vte_urlencode() {
-    # Use LC_CTYPE=C to process text byte-by-byte.
-    local LC_CTYPE=C LC_ALL= _raw_url="$1" _safe_url="" _safe
-    while [[ -n "$_raw_url" ]]; do
-      _safe="${_raw_url%%[!a-zA-Z0-9/:_\.\-\!\'\(\)~]*}"
-      _safe_url+="$_safe"
-      _raw_url="${_raw_url#"$_safe"}"
-      if [[ -n "$_raw_url" ]]; then
-        _safe_url+="%$(([##16] #_raw_url))"
-        _raw_url="${_raw_url#?}"
-      fi
-    done
-    echo -E "$_safe_url"
-  }
-
-  __vte_osc7() {
-    printf "\e]7;file://%s%s\a" "$HOST" "$(__vte_urlencode "$PWD")"
-  }
-  add-zsh-hook precmd __vte_osc7
-fi
-
 ###########
 #  Theme  #
 ###########
-setopt prompt_subst
-
-[[ -z "$DISPLAY$WAYLAND_DISPLAY$SSH_CONNECTION" ]] && USE_POWERLINE=0
-
 if [[ "$TERM" == "dumb" ]]; then
   PROMPT="%n: %~%# "
   unset zle_bracketed_paste
@@ -221,73 +257,11 @@ if [[ "$TERM" == "dumb" ]]; then
   return
 fi
 
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' actionformats \
-  '%b@%s%f: %F{blue}%r/%S%f' '[%F{red}%a%f]%c%u'
-zstyle ':vcs_info:*' formats \
-  '%b@%s%f: %F{blue}%r/%S%f' '%c%u'
-zstyle ':vcs_info:*' stagedstr "[%B%F{yellow}staged%f%b]"
-zstyle ':vcs_info:*' unstagedstr "[%B%F{red}unstaged%f%b]"
-zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' enable git
+unset LS_COLORS # clear distro defaults
 
-__update_prompt() {
-  local _prompt="%(?::%F{red})%#%f" _login="%B%(!:%F{red}:)" _hname=""
-  if [[ -n "$SSH_CONNECTION" ]]; then
-    _login="%B%(!:%F{red}:%F{green})"
-    _hname="@%m"
-  fi
+autoload -Uz promptinit && promptinit
+prompt concise
 
-  local _begin= _end=
-  if zstyle -T ':iterm2:osc' enable; then
-    _begin=$'%{\e]133;D;%?\a\e]133;A\a%}'
-    _end=$'%{\e]133;B\a%}'
-  fi
-
-  vcs_info
-  if [[ -n "$vcs_info_msg_0_" ]]; then
-    PROMPT="$_begin$_login$vcs_info_msg_0_"$'\n'"$_prompt%b $_end"
-    RPROMPT="$vcs_info_msg_1_"
-  else
-    PROMPT="$_begin$_login%n$_hname%f: %F{blue}%~%f"$'\n'"$_prompt%b $_end"
-    RPROMPT=""
-  fi
-}
-
-__update_term() {
-  if [[ -n "$SSH_CONNECTION" ]]; then
-    print -Pn "\e]0;%m: %1~\a"
-  else
-    print -Pn "\e]0;%1~\a"
-  fi
-
-  if zstyle -T ':iterm2:osc' enable; then
-    printf "\e]1337;RemoteHost=%s@%s\a\e]1337;CurrentDir=%s\a\e]133;C\a" \
-      "$USER" "$HOST" "$PWD"
-  fi
-}
-
-add-zsh-hook precmd __update_prompt
-add-zsh-hook preexec __update_term
-
-case "$TERM" in
-  xterm-256color|screen-256color)
-    __vi_cursor() {
-      local _shape=6
-      [[ "$ZLE_STATE" == *overwrite* ]] && _shape=4
-      [[ "$KEYMAP" == vicmd ]] && _shape=2
-      print -Pn "\e[$_shape q"
-    }
-
-    __reset_cursor() {
-      print -Pn "\e[2 q"
-    }
-
-    zle -N zle-line-init __vi_cursor
-    zle -N zle-keymap-select __vi_cursor
-    add-zsh-hook preexec __reset_cursor
-    ;;
-esac
-
+# must be run last
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
