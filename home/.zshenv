@@ -4,7 +4,7 @@ export LESS="iMR"
 export PAGER="less"
 export SYSTEMD_LESS="iRSMK"
 
-export GOPATH=/usr/local/go
+export GOPATH=~/Documents/src/go
 export ANDROID_HOME=~/.local/opt/android-sdk
 
 # whether to make use of powerline fonts
