@@ -43,6 +43,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/git/config
   - .config/git/ignore
   - .config/tig/config
+  - .local/bin/git-deploy
   - .local/bin/git-fancy
 
 @install Install GPG Config
@@ -52,6 +53,16 @@ source "$DOTFILE_DIR/scripts/setup"
   - chmod: 600 .gnupg/gpg-agent.conf
   - .gnupg/gpg.conf
   - .gnupg/gpg-agent.conf
+
+@install Install SSH Config
+  - shell: install -d -m 700 ~/.ssh ~/.ssh/sockets
+  - chmod: 700 .ssh
+  - .ssh/config
+  - .ssh/config.d/10-canonicalize.conf
+  - .ssh/config.d/80-git.conf
+  - .ssh/config.d/90-general.conf
+  - .ssh/config.d/90-multiplexing.conf
+  - .local/bin/rcd
 
 @install Install GDB Config
   - .gdbinit
@@ -66,7 +77,7 @@ source "$DOTFILE_DIR/scripts/setup"
 
 @install Install Spacemacs Config
   - github: syl20bnr/spacemacs ~/.emacs.d
-  - .spacemacs
+  - .spacemacs.d/init.el
 
 @install Install VSCode Config
   - shell: install -d -m 700 ~/.config/Code
