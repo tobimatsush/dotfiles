@@ -39,6 +39,7 @@ alias sudoedit='sudo -e'
 autoload -Uz zmv
 autoload -Uz cud fuck
 autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
+command -v hub > /dev/null 2>&1 && alias git='hub'
 
 #################
 #  Directories  #
@@ -78,30 +79,42 @@ setopt menu_complete
 setopt list_packed
 zmodload -i zsh/complist
 
-# case-insensitive (all),partial-word and then substring completion
-zstyle ':completion:*' matcher-list \
-  'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+() {
+  setopt localoptions extended_glob
+  autoload -Uz compinit
 
-zstyle ':completion:*' list-colors ''
-zstyle ':completion:*' menu select
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion:*' recent-dirs-insert fallback
-zstyle ':completion:*:functions' ignored-patterns '_*'
-zstyle ':completion:*:manuals' separate-sections true
-zstyle ':completion:*:manuals.*' insert-sections true
-zstyle ':completion:*:*:kill:*:processes' list-colors \
-  '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
-zstyle ':completion:*:*:*:*:processes' \
-  command "ps -u `whoami` -o pid,user,comm -w -w"
+  [[ -d ~/Library/Caches/zsh/completion ]] \
+    || mkdir -p ~/Library/Caches/zsh/completion
 
-autoload -Uz compinit
-# update the completion cache only once a day
-if [[ -f ~/.zcompdump(#qN.m+1) ]]; then
-  # XXX: skip the slooow security checks; it's pointless in a single-user setup
-  compinit -u
-else
-  compinit -C
-fi
+  zstyle ':completion:*' menu select
+  zstyle ':completion:*' use-cache true
+  zstyle ':completion:*' cache-path ~/Library/Caches/zsh/completion
+  zstyle ':completion:*' list-colors ''
+  zstyle ':completion:*' recent-dirs-insert fallback
+  # case-insensitive (all),partial-word and then substring completion
+  zstyle ':completion:*' matcher-list \
+    'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+
+  zstyle ':completion:*:functions' ignored-patterns '(_*|prompt_*)'
+  zstyle ':completion:*:manuals' separate-sections true
+  zstyle ':completion:*:manuals.(^1*)' insert-sections true
+  zstyle ':completion:*:*:kill:*:processes' list-colors \
+    '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
+  zstyle ':completion:*:*:*:*:processes' \
+    command "ps -u `whoami` -o pid,user,comm -w -w"
+  zstyle ':completion:*:*:*:users' ignored-patterns '_*'
+
+  # update the completion cache only once a day
+  if [[ -n ~/Library/Caches/zsh/compdump(#qN.m+1) ]]; then
+    # XXX: ignore compaudit warnings b/c it's pointless for most people
+    compinit -u -d ~/Library/Caches/zsh/compdump \
+      && touch ~/Library/Caches/zsh/compdump
+  else
+    compinit -C -d ~/Library/Caches/zsh/compdump # skip compaudit b/c it's slow
+  fi
+
+  compdef rcd=ssh
+}
 
 # define a completion widget that parses --help output
 zle -C complete-from-help complete-word _generic
@@ -116,7 +129,7 @@ autoload -Uz select-bracketed && zle -N select-bracketed
 autoload -Uz select-quoted && zle -N select-quoted
 autoload -Uz smart-insert-last-word && zle -N smart-insert-last-word
 autoload -Uz vim-pipe && zle -N vim-pipe
-autoload -Uz fzf-complete && zle -N fzf-complete
+autoload -Uz fzf-completion && zle -N fzf-completion
 autoload -Uz fzf-cd-widget && zle -N fzf-cd-widget
 autoload -Uz fzf-cdr-widget && zle -N fzf-cdr-widget
 autoload -Uz fzf-file-widget && zle -N fzf-file-widget
@@ -143,7 +156,7 @@ bindkey -v \
   '^B' copy-earlier-word \
   '^Gu' split-undo \
   '^H' backward-delete-char \
-  '^I' fzf-complete \
+  '^I' fzf-completion \
   '^J' fzf-snippet-next \
   '^N' history-beginning-search-forward \
   '^O' fzf-cdr-widget \
@@ -170,23 +183,26 @@ bindkey -a \
   '!' vim-pipe
 bindkey -M menuselect \
   '^B' backward-char \
+  '^E' undo \
   '^F' forward-char \
   '^J' accept-and-menu-complete \
   '^N' down-line-or-history \
   '^P' up-line-or-history \
-  '^U' undo \
   '^X^F' accept-and-infer-next-history \
-  '^X^X' vi-insert
+  '^X^X' vi-insert \
+  '^Y' accept-line
 
-local _mode _char
-for _mode in visual viopp; do
-  for _char in {a,i}${(s..)^:-'()[]{}<>bB'}; do
-    bindkey -M $_mode $_char select-bracketed
+() {
+  local mode key
+  for mode in visual viopp; do
+    for key in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+      bindkey -M $mode $key select-bracketed
+    done
+    for key in {a,i}{\',\",\`}; do
+      bindkey -M $mode $key select-quoted
+    done
   done
-  for _char in {a,i}{\',\",\`}; do
-    bindkey -M $_mode $_char select-quoted
-  done
-done
+}
 
 ######################
 #  Terminal Support  #
@@ -206,7 +222,7 @@ __term_support() {
     setopt localoptions extended_glob no_multibyte
     local match mbegin mend
     local pattern="[^A-Za-z0-9_.!~*\'\(\)-\/]"
-    local unsafepwd=( ${(s::)PWD} )
+    local unsafepwd; unsafepwd=( ${(s::)PWD} )
 
     # url encode
     printf "\e]7;file://%s%s\a" \
@@ -247,7 +263,8 @@ setopt long_list_jobs
 setopt no_clobber
 setopt no_flowcontrol
 autoload -Uz select-word-style && select-word-style bash
-autoload -Uz zrecompile && zrecompile -pq -R ~/.zshrc -- -M ~/.zcompdump &!
+autoload -Uz zrecompile && \
+  zrecompile -pq -R ~/.zshrc -- -M ~/Library/Caches/zsh/compdump &!
 autoload -Uz url-quote-magic && zle -N self-insert url-quote-magic
 if is-at-least 5.2; then
   autoload -Uz bracketed-paste-url-magic && \
