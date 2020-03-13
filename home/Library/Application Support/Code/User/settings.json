@@ -9,7 +9,7 @@
     "editor.minimap.enabled": true,
     "editor.minimap.renderCharacters": false,
     "editor.renderIndentGuides": true,
-    "workbench.colorTheme": "Monokai",
+    "workbench.colorTheme": "Gruvbox Dark Medium",
 
     "[cpp]": {
         "editor.quickSuggestions": false
