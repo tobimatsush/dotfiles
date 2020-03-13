@@ -2,11 +2,13 @@ fpath+=(~/.local/share/zsh/site-functions)
 autoload -Uz add-zsh-hook
 autoload -Uz is-at-least
 
+[[ -d ~/.cache/zsh/completion ]] || mkdir -p ~/.cache/zsh/completion
+
 ###########################
 #  Environment Variables  #
 ###########################
 export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
-export GPG_TTY="$(tty)"
+export GPG_TTY="$TTY"
 
 typeset -U path
 path=(
@@ -29,9 +31,8 @@ alias ll='ls -lh'
 alias la='ls -lAh'
 alias xmonad-replace='nohup xmonad --replace &> /dev/null &'
 autoload -Uz zmv
-autoload -Uz cud fuck
+autoload -Uz br cud fuck
 autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
-command -v hub > /dev/null 2>&1 && alias git='hub'
 
 #################
 #  Directories  #
@@ -45,6 +46,7 @@ autoload -Uz chpwd_recent_dirs cdr
 chpwd_functions=(chpwd_recent_dirs)
 zstyle ':chpwd:*' recent-dirs-default true
 zstyle ':chpwd:*' recent-dirs-max 500
+zstyle ':chpwd:*' recent-dirs-file ~/.cache/zsh/cdhistory
 
 #############
 #  History  #
@@ -75,8 +77,6 @@ zmodload -i zsh/complist
   setopt localoptions extended_glob
   autoload -Uz compinit
 
-  [[ -d ~/.cache/zsh/completion ]] || mkdir -p ~/.cache/zsh/completion
-
   zstyle ':completion:*' menu select
   zstyle ':completion:*' use-cache true
   zstyle ':completion:*' cache-path ~/.cache/zsh/completion
@@ -92,7 +92,7 @@ zmodload -i zsh/complist
   zstyle ':completion:*:*:kill:*:processes' list-colors \
     '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
   zstyle ':completion:*:*:*:*:processes' \
-    command "ps -u `whoami` -o pid,user,comm -w -w"
+    command "ps -u $USER -o pid,user,comm -w -w"
   zstyle ':completion:*:*:*:users' ignored-patterns '_*'
 
   # update the completion cache only once a day
@@ -126,6 +126,7 @@ autoload -Uz fzf-file-widget && zle -N fzf-file-widget
 autoload -Uz fzf-history-widget && zle -N fzf-history-widget
 autoload -Uz fzf-snippet-expand && zle -N fzf-snippet-expand
 autoload -Uz fzf-snippet-next && zle -N fzf-snippet-next
+autoload -Uz toggle-leading-space && zle -N toggle-leading-space
 autoload -Uz surround \
   && zle -N delete-surround surround \
   && zle -N add-surround surround \
@@ -144,6 +145,7 @@ bindkey -rv '^[,' '^[/' '^[~'
 bindkey -v \
   '^A' smart-insert-last-word \
   '^B' copy-earlier-word \
+  '^E' history-incremental-search-forward \
   '^Gu' split-undo \
   '^H' backward-delete-char \
   '^I' fzf-completion \
@@ -151,12 +153,14 @@ bindkey -v \
   '^N' history-beginning-search-forward \
   '^O' fzf-cdr-widget \
   '^P' history-beginning-search-backward \
+  '^T' toggle-leading-space \
   '^U' backward-kill-line \
   '^W' backward-kill-word \
   '^X^F' fzf-file-widget \
   '^X^J' fzf-snippet-expand \
   '^X^O' complete-from-help \
   '^X^R' fzf-history-widget \
+  '^Y' history-incremental-search-backward \
   '^?' backward-delete-char
 bindkey -ra 's'
 bindkey -a \

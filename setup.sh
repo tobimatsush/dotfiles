@@ -6,17 +6,9 @@ source "$DOTFILE_DIR/scripts/setup"
 # Remove dead symlinks
 @clean
   - gc: true
-  # the rest of this section is kept for backwards compatibility
-  - .gitconfig
-  - .latexmkrc
-  - .vimrc
-  - .gvimrc
-  - .config/shell/common.snip
-  - .mikutter/plugin
-  - .nixpkgs/config.nix
 
-@install Update Submodules
-  - shell: git submodule --quiet update --init --remote
+@shell Update Submodules
+  - git submodule --quiet update --init --remote
 
 @install Install Shell Config
   - .bash_profile
@@ -94,6 +86,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/ranger/scope.sh
   - .config/tilix/schemes/gruvbox-dark.json
   - .config/zathura/zathurarc
+  - .docker/config.json
   - .ipython/profile_default/ipython_config.py
   - .local/libexec/fzf/install
   - .local/opt/fzftools
@@ -105,7 +98,8 @@ source "$DOTFILE_DIR/scripts/setup"
   - .xprofile
   - .xmonad
 
-# Will not run unless --init is specified
+# The below will not run unless --init is specified
+
 @packages
   - init: true
   - build-essential
@@ -113,3 +107,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - cmigemo
   - zsh-syntax-highlighting
   - shell: vim +PlugInstall +qall
+
+@githooks
+  - init: true
+  - post-receive
