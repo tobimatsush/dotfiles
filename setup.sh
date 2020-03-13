@@ -6,16 +6,9 @@ source "$DOTFILE_DIR/scripts/setup"
 # Remove dead symlinks
 @clean
   - gc: true
-  # the rest of this section is kept for backwards compatibility
-  - .gitconfig
-  - .latexmkrc
-  - .vimrc
-  - .gvimrc
-  - .config/shell/common.snip
-  - .mikutter/plugin
 
-@install Update Submodules
-  - shell: git submodule --quiet update --init --remote
+@shell Update Submodules
+  - git submodule --quiet update --init --remote
 
 @install Install Shell Config
   - .bash_profile
@@ -87,6 +80,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/ranger/rc.conf
   - .config/ranger/scope.sh
   - .config/zathura/zathurarc
+  - .docker/config.json
   - .ipython/profile_default/ipython_config.py
   - .local/bin/rmpkg
   - .local/bin/imgcat
@@ -99,7 +93,8 @@ source "$DOTFILE_DIR/scripts/setup"
   - .wgetrc
   - Library/Application\ Support/AquaSKK/keymap.conf
 
-# Will not run unless --init is specified
+# The below will not run unless --init is specified
+
 @packages
   - init: true
   - cmake
@@ -108,3 +103,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - zsh-completions
   - zsh-syntax-highlighting
   - shell: vim +PlugInstall +qall
+
+@githooks
+  - init: true
+  - post-receive
