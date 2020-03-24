@@ -16,5 +16,6 @@
     },
     "[c]": {
         "editor.quickSuggestions": false
-    }
+    },
+    "window.newWindowDimensions": "maximized"
 }
