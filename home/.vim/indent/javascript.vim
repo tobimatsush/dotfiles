@@ -1,3 +1,3 @@
-if executable('js-beautify')
-    setlocal formatprg=js-beautify
+if executable('prettier')
+  setlocal formatprg=prettier\ --parser=babel
 endif

@@ -1,15 +1,8 @@
-func! vimrc#plug#go(info)
-  if !executable('go')
-    return
-  endif
-
-  GoInstallBinaries
-endf
-
 func! vimrc#plug#ycm(info)
   let completers = {
-        \ 'cmake' : '--clang-completer',
+        \ 'cmake' : '--clangd-completer',
         \ 'cargo' : '--rust-completer',
+        \ 'go' : '--go-completer',
         \ 'javac' : '--java-completer',
         \ 'mono' : '--cs-completer',
         \ 'npm' : '--ts-completer',

@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Script to change user information
+
+# This is one of the very few scripts where portability matters. Normally I'd
+# deal with portability issues by using different git branches to handle
+# platform differences, freeing the script of the need to handle it by itself.
+# This script however, is intended to be run on the master branch regardless of
+# which platform it's actually being used on. For this reason, this script uses
+# perl instead of sed which is incompatible between GNU and BSD variants.
+
 DOTFILE_DIR="${DOTFILE_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
 main() {
@@ -39,12 +48,18 @@ patch::git() {
 }
 
 patch::gpg() {
-  if [[ -n "$GPGKEYID" ]]; then
-    sed -i '' -e "s/^default-key.*/default-key $GPGKEYID" \
-      "$DOTFILE_DIR/home/.gnupg/gpg.conf"
+  local confpath="$DOTFILE_DIR/home/.gnupg/gpg.conf"
+
+  if [[ -z "$GPGKEYID" ]]; then
+    # if no keyid is specified, remove keyid setting
+    perl -i -ne 'print unless /^default-key/' "$confpath"
+    perl -i -pe 'if ($. == 1) { $_ = <> while m/^\n/ }' "$confpath"
+  elif grep -q '^default-key' "$confpath"; then
+    # if there's an existing keyid setting, replace it
+    perl -i -pe "s/^default-key.*/default-key $GPGKEYID/" "$confpath"
   else
-    sed -i '' -e '/^default-key/d' -e '/./,$!d' \
-      "$DOTFILE_DIR/home/.gnupg/gpg.conf"
+    # add keyid setting
+    perl -i -pe "print \"default-key $GPGKEYID\n\n\" if \$. == 1" "$confpath"
   fi
 }
 

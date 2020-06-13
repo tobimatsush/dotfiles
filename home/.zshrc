@@ -18,6 +18,7 @@ path=(
   "$GEM_HOME/bin"
   "$(python3 -c 'import site; print(site.getuserbase())')/bin"
   "$GOPATH/bin"
+  ~/.emacs.d/bin
 )
 
 ###########################
@@ -29,7 +30,6 @@ alias egrep='egrep --color=auto'
 alias ls='ls -F --color=auto'
 alias ll='ls -lh'
 alias la='ls -lAh'
-alias xmonad-replace='nohup xmonad --replace &> /dev/null &'
 autoload -Uz zmv
 autoload -Uz br cud fuck
 autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
@@ -244,6 +244,9 @@ case "$TERM" in
     zle -N zle-keymap-select __vi_cursor
     add-zsh-hook preexec __reset_cursor
     add-zsh-hook precmd __term_support
+    ;|
+  eterm*|xterm-kitty)
+    zstyle ':iterm2:osc' enable false
     ;;
 esac
 
@@ -270,9 +273,10 @@ source /etc/zsh_command_not_found
 #  Theme  #
 ###########
 if [[ "$TERM" == "dumb" ]]; then
+  unsetopt zle prompt_cr prompt_subst
+  add-zsh-hook -D precmd '*'
+  add-zsh-hook -D preexec '*'
   PROMPT="%n: %~%# "
-  unset zle_bracketed_paste
-  bindkey -v '^J' accept-line
   return
 fi
 
