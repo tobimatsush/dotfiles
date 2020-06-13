@@ -1,26 +1,26 @@
 diff --git a/home/.bashrc b/home/.bashrc
-index 1297248..ec74a7c 100644
+index dcd2c64..e592579 100644
 --- a/home/.bashrc
 +++ b/home/.bashrc
-@@ -8,7 +8,7 @@ esac
- ###########################
- export GEM_HOME="$(/usr/bin/ruby -e 'print Gem.user_dir')"
- export GPG_TTY="$(tty)"
+@@ -18,7 +18,7 @@ export GOPATH=~/Documents/src/go
+ export ANDROID_HOME=/usr/local/share/android-sdk
+ 
+ # whether to make use of powerline fonts
 -export USE_POWERLINE=0
 +export USE_POWERLINE=1
+ case "$TERM:$TERM_PROGRAM" in
+   xterm-kitty:) USE_POWERLINE=1 ;; # kitty can use the powerline font directly
+   *:iTerm.app) USE_POWERLINE=1 ;; # iTerm provides built-in powerline glyphs
+diff --git a/home/.zshenv b/home/.zshenv
+index 0467b1b..3a1db79 100644
+--- a/home/.zshenv
++++ b/home/.zshenv
+@@ -9,7 +9,7 @@ export GOPATH=~/Documents/src/go
+ export ANDROID_HOME=/usr/local/share/android-sdk
  
- PATH="$HOME/.local/bin:$PATH"
- PATH+=":$HOME/.cargo/bin"
-diff --git a/home/.zshrc b/home/.zshrc
-index df180aa..53e8e8d 100644
---- a/home/.zshrc
-+++ b/home/.zshrc
-@@ -7,7 +7,7 @@ autoload -Uz is-at-least
- ###########################
- export GEM_HOME="$(/usr/bin/ruby -e 'print Gem.user_dir')"
- export GPG_TTY="$(tty)"
+ # whether to make use of powerline fonts
 -export USE_POWERLINE=0
 +export USE_POWERLINE=1
- 
- typeset -U path
- path=(
+ case "$TERM:$TERM_PROGRAM" in
+   xterm-kitty:) USE_POWERLINE=1 ;; # kitty can use the powerline font directly
+   *:iTerm.app) USE_POWERLINE=1 ;; # iTerm provides built-in powerline glyphs

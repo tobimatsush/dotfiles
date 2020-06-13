@@ -22,6 +22,7 @@ path=(
   "$GEM_HOME/bin"
   "$(python3 -c 'import site; print(site.getuserbase())')/bin"
   "$GOPATH/bin"
+  ~/.emacs.d/bin
 )
 
 if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
@@ -256,6 +257,9 @@ case "$TERM" in
     zle -N zle-keymap-select __vi_cursor
     add-zsh-hook preexec __reset_cursor
     add-zsh-hook precmd __term_support
+    ;|
+  eterm*|xterm-kitty)
+    zstyle ':iterm2:osc' enable false
     ;;
 esac
 
@@ -279,9 +283,11 @@ fi
 #  Theme  #
 ###########
 if [[ "$TERM" == "dumb" ]]; then
+  unsetopt zle prompt_cr prompt_subst
+  unset CLICOLOR
+  add-zsh-hook -D precmd '*'
+  add-zsh-hook -D preexec '*'
   PROMPT="%n: %~%# "
-  unset zle_bracketed_paste
-  bindkey -v '^J' accept-line
   return
 fi
 

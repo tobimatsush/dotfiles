@@ -1,6 +1,34 @@
+##########################
+#  Early Initialization  #
+##########################
+
+# Setup some environment variables before the interactivity check. This is the
+# only place where you can place startup commands that will be picked up by
+# non-interactive SSH sessions.
+#
+# https://www.gnu.org/software/bash/manual/bash.html#Invoked-by-remote-shell-daemon
+
+export COPYFILE_DISABLE=1
+export EDITOR="vim"
+export LANG="en_US.UTF-8"
+export LESS="iMR"
+export PAGER="less"
+
+export GOPATH=~/Documents/src/go
+export ANDROID_HOME=/usr/local/share/android-sdk
+
+# whether to make use of powerline fonts
+export USE_POWERLINE=0
+case "$TERM:$TERM_PROGRAM" in
+  xterm-kitty:) USE_POWERLINE=1 ;; # kitty can use the powerline font directly
+  *:iTerm.app) USE_POWERLINE=1 ;; # iTerm provides built-in powerline glyphs
+  *:) USE_POWERLINE=0 ;;
+esac
+
+# skip the rest for non-interactive sessions
 case $- in
   *i*) ;;
-  *) return;;
+  *) return ;;
 esac
 
 ###########################
@@ -15,6 +43,7 @@ PATH+=":$HOME/.cargo/bin"
 PATH+=":$GEM_HOME/bin"
 PATH+=":$(python3 -c 'import site; print(site.getuserbase())')/bin"
 PATH+=":$GOPATH/bin"
+PATH+=":$HOME/.emacs.d/bin"
 export PATH
 
 if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
@@ -57,10 +86,36 @@ fi
 
 source ~/.local/opt/fzftools/fzftools.bash
 
+# Report the working directory
+case "$TERM" in
+  xterm*|screen*|tmux*)
+    __vte_urlencode() {
+      # Use LC_CTYPE=C to process text byte-by-byte.
+      local LC_CTYPE=C LC_ALL= raw_url="$1" safe
+      while [[ -n "$raw_url" ]]; do
+        safe="${raw_url%%[!a-zA-Z0-9/:_\.\-\!\'\(\)~]*}"
+        printf "%s" "$safe"
+        raw_url="${raw_url#"$safe"}"
+        if [[ -n "$raw_url" ]]; then
+          printf "%%%02X" "'$raw_url"
+          raw_url="${raw_url#?}"
+        fi
+      done
+    }
+
+    __vte_osc7() {
+      printf "\e]7;file://%s%s\a" "${HOSTNAME:-}" "$(__vte_urlencode "$PWD")"
+    }
+
+    PROMPT_COMMAND="__vte_osc7;$PROMPT_COMMAND"
+    ;;
+esac
+
 ###########
 #  Theme  #
 ###########
 if [[ $TERM == "dumb" ]]; then
+  unset CLICOLOR
   PS1='\u@\h:\w\$ '
   return
 fi

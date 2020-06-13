@@ -35,6 +35,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/tig/config
   - .local/bin/git-deploy
   - .local/bin/git-fancy
+  - .local/bin/git-kitty
 
 @install Install GPG Config
   - shell: install -d -m 700 ~/.gnupg
@@ -55,18 +56,16 @@ source "$DOTFILE_DIR/scripts/setup"
   - .ssh/config.d/90-multiplexing.conf
   - .local/bin/rcd
 
-@install Install GTK Config
-  - .gtkrc-2.0
-  - .themes/zuki-themes
-
 @install Install LaTeX Config
   - .config/latexmk/latexmkrc
   - .local/bin/platexmk
   - .local/bin/uplatexmk
 
-@install Install Spacemacs Config
-  - github: syl20bnr/spacemacs ~/.emacs.d
-  - .spacemacs.d/init.el
+@install Install Emacs Config
+  - github: hlissner/doom-emacs ~/.emacs.d
+  - .config/doom/init.el
+  - .config/doom/config.org
+  - .config/doom/packages.el
 
 @install Install VSCode Config
   - shell: install -d -m 700 ~/Library/Application\ Support/Code
@@ -77,6 +76,8 @@ source "$DOTFILE_DIR/scripts/setup"
   - .editrc
   - .ideavimrc
   - .config/bat/config
+  - .config/kitty/kitty.conf
+  - .config/nixpkgs/config.nix
   - .config/ranger/rc.conf
   - .config/ranger/scope.sh
   - .config/zathura/zathurarc
@@ -88,7 +89,6 @@ source "$DOTFILE_DIR/scripts/setup"
   - .local/opt/tmux-copycat
   - .nanorc
   - .screenrc
-  - .tern-config
   - .tmux.conf
   - .wgetrc
   - Library/Application\ Support/AquaSKK/keymap.conf
@@ -100,9 +100,12 @@ source "$DOTFILE_DIR/scripts/setup"
   - cmake
   - cmigemo
   - fzf
+  - ripgrep
   - zsh-completions
   - zsh-syntax-highlighting
+  - cask: homebrew/cask-fonts/font-powerline-symbols
   - shell: vim +PlugInstall +qall
+  - shell: ~/.emacs.d/bin/doom -y install --no-config
 
 @githooks
   - init: true

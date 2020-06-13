@@ -1,18 +1,22 @@
-diff --git a/home/.bash_profile b/home/.bash_profile
-index a2d5c8a..6ab7100 100644
---- a/home/.bash_profile
-+++ b/home/.bash_profile
-@@ -1,4 +1,4 @@
+diff --git a/home/.bashrc b/home/.bashrc
+index dcd2c64..8534113 100644
+--- a/home/.bashrc
++++ b/home/.bashrc
+@@ -9,7 +9,7 @@
+ # https://www.gnu.org/software/bash/manual/bash.html#Invoked-by-remote-shell-daemon
+ 
+ export COPYFILE_DISABLE=1
 -export EDITOR="vim"
 +export EDITOR="nvim"
  export LANG="en_US.UTF-8"
  export LESS="iMR"
  export PAGER="less"
 diff --git a/home/.zshenv b/home/.zshenv
-index 20150c1..1561f5d 100644
+index 0467b1b..6298d99 100644
 --- a/home/.zshenv
 +++ b/home/.zshenv
-@@ -1,4 +1,4 @@
+@@ -1,5 +1,5 @@
+ export COPYFILE_DISABLE=1
 -export EDITOR="vim"
 +export EDITOR="nvim"
  export LANG="en_US.UTF-8"
