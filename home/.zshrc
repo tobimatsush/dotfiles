@@ -30,6 +30,7 @@ alias egrep='egrep --color=auto'
 alias ls='ls -F --color=auto'
 alias ll='ls -lh'
 alias la='ls -lAh'
+alias ssh-fa='ssh-agent ssh -o AddKeysToAgent=confirm -o ForwardAgent=yes'
 autoload -Uz zmv
 autoload -Uz br cud fuck
 autoload -Uz fzf-sel fzf-run fzf-loop fzf-gen
@@ -122,6 +123,7 @@ autoload -Uz vim-pipe && zle -N vim-pipe
 autoload -Uz fzf-completion && zle -N fzf-completion
 autoload -Uz fzf-cd-widget && zle -N fzf-cd-widget
 autoload -Uz fzf-cdr-widget && zle -N fzf-cdr-widget
+autoload -Uz fzf-cd-repo-widget && zle -N fzf-cd-repo-widget
 autoload -Uz fzf-file-widget && zle -N fzf-file-widget
 autoload -Uz fzf-history-widget && zle -N fzf-history-widget
 autoload -Uz fzf-snippet-expand && zle -N fzf-snippet-expand
@@ -147,6 +149,8 @@ bindkey -v \
   '^B' copy-earlier-word \
   '^E' history-incremental-search-forward \
   '^Gu' split-undo \
+  '^G^F' fzf-cd-widget \
+  '^G^P' fzf-cd-repo-widget \
   '^H' backward-delete-char \
   '^I' fzf-completion \
   '^J' fzf-snippet-next \
@@ -164,7 +168,6 @@ bindkey -v \
   '^?' backward-delete-char
 bindkey -ra 's'
 bindkey -a \
-  'gf' fzf-cd-widget \
   'g^A' sync-incarg \
   'g^X' sync-decarg \
   'sa' add-surround \
@@ -283,7 +286,7 @@ fi
 unset LS_COLORS # clear distro defaults
 
 autoload -Uz promptinit && promptinit
-prompt concise
+prompt dashboard
 
 # must be run last
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

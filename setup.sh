@@ -18,11 +18,14 @@ source "$DOTFILE_DIR/scripts/setup"
   - .zshrc
   - .zlogout
   - .inputrc
-  - .config/shell/snippets/common.snip
-  - .config/shell/snippets/linux.snip
+  - .config/shell/snippets/common
+  - .config/shell/snippets/linux
+  - .config/shell/snippets/main/common.md
+  - .config/shell/snippets/main/linux.md
   - .config/shell/templates
   - .config/shell/templates.csv
   - .local/share/zsh/site-functions
+  - .local/opt/tldr
 
 @install Install Vim Config
   - .vim
@@ -95,6 +98,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .local/libexec/fzf/install
   - .local/opt/fzftools
   - .local/opt/tmux-copycat
+  - .prettierrc
   - .screenrc
   - .tmux.conf
   - .wgetrc
@@ -108,8 +112,10 @@ source "$DOTFILE_DIR/scripts/setup"
   - cmake
   - cmigemo
   - fonts-powerline
+  - neovim
+  - nodejs
   - zsh-syntax-highlighting
-  - shell: vim +PlugInstall +qall
+  - shell: nvim +PlugInstall +qall
   - shell: ~/.emacs.d/bin/doom -y install --no-config
 
 @githooks
