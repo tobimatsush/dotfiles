@@ -16,11 +16,14 @@ source "$DOTFILE_DIR/scripts/setup"
   - .zshenv
   - .zshrc
   - .inputrc
-  - .config/shell/snippets/common.snip
-  - .config/shell/snippets/macos.snip
+  - .config/shell/snippets/common
+  - .config/shell/snippets/osx
+  - .config/shell/snippets/main/common.md
+  - .config/shell/snippets/main/osx.md
   - .config/shell/templates
   - .config/shell/templates.csv
   - .local/share/zsh/site-functions
+  - .local/opt/tldr
 
 @install Install Vim Config
   - .vim
@@ -55,6 +58,8 @@ source "$DOTFILE_DIR/scripts/setup"
   - .ssh/config.d/90-general.conf
   - .ssh/config.d/90-multiplexing.conf
   - .local/bin/rcd
+  - .local/libexec/ssh-askpass
+  - Library/LaunchAgents/com.openssh.ssh-askpass.plist
 
 @install Install LaTeX Config
   - .config/latexmk/latexmkrc
@@ -88,6 +93,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .local/opt/fzftools
   - .local/opt/tmux-copycat
   - .nanorc
+  - .prettierrc
   - .screenrc
   - .tmux.conf
   - .wgetrc
@@ -101,10 +107,12 @@ source "$DOTFILE_DIR/scripts/setup"
   - cmigemo
   - fzf
   - ripgrep
+  - neovim
+  - nodejs
   - zsh-completions
   - zsh-syntax-highlighting
   - cask: homebrew/cask-fonts/font-powerline-symbols
-  - shell: vim +PlugInstall +qall
+  - shell: nvim +PlugInstall +qall
   - shell: ~/.emacs.d/bin/doom -y install --no-config
 
 @githooks

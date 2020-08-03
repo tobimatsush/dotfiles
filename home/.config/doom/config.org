@@ -75,6 +75,23 @@ operating on the right region.
 (setq evil-goggles-duration 1
       evil-goggles-pulse t)
 #+END_SRC
+** Ivy
+[[https://github.com/abo-abo/swiper][Ivy]] is a fuzzy finder for Emacs used throughtout the Doom UI.
+
+Let's start by configuring Ivy's matching algorithm. ~ivy--regex-plus~ will
+replace spaces with the regex ~.*~.
+
+#+BEGIN_SRC emacs-lisp
+(setq ivy-re-builders-alist '((t . ivy--regex-plus)))
+#+END_SRC
+
+Next, specify the UI for showing actions to be performed on an Ivy selection. At
+the time of writing, the default UI wouldn't show all available actions, so just
+change it to something that does:
+
+#+BEGIN_SRC emacs-lisp
+(setq ivy-read-action-function #'ivy-hydra-read-action)
+#+END_SRC
 * Editing
 ** Indentation
 Unfortunately, configuring indentation in Emacs is not as straightforward as
@@ -188,11 +205,40 @@ Localize holidays for Japan
 #+END_SRC
 ** Magit
 Tell Magit where to look for repositories. Since I use a =domain/user/project=
-layout for organizing my repositories, the max depth should be set to 3.
+layout for organizing my repositories, the max depth should be set to 3. Also
+inform projectile about it.
 
 #+BEGIN_SRC emacs-lisp
 (setq magit-repository-directories
-      '(("~/Documents/src/repos" . 3) ("~/Documents/src/go/src" . 3)))
+        '(("~/Documents/src/repos" . 3) ("~/Documents/src/go/src" . 3))
+      projectile-project-search-path
+        (mapcar #'car magit-repository-directories))
+#+END_SRC
+
+Add a command in the "push" menu to push to a remote without an explicit
+refspec. This is useful if you want to use a refspec that you've specified in
+your gitconfig.
+
+#+BEGIN_SRC emacs-lisp
+(after! magit
+  (transient-append-suffix 'magit-push "r"
+    '("R" "implicit refspecs" magit-push-to-remote)))
+#+END_SRC
+
+Add a keybinding to browse files in other git projects. It works similarly to
+=SPC p p= (bound to [[elisp:(projectile-switch-project)][projectile-switch-project]]), but it can find projects not
+visited before. It looks for git projects in ~magit-repository-directories~.
+
+#+BEGIN_SRC emacs-lisp
+(defun rc-browse-in-git-repo ()
+  (interactive)
+  (doom-project-browse (magit-read-repository)))
+
+(map! :after magit
+      :leader
+      :prefix "g"
+      :desc "Browse other git projects"
+      "p" #'rc-browse-in-git-repo)
 #+END_SRC
 ** Org Mode
 Set default location for placing org files
@@ -200,6 +246,7 @@ Set default location for placing org files
 #+BEGIN_SRC emacs-lisp
 (setq org-directory "~/Documents/org/"
       org-archive-location (concat org-directory ".archive/%s::")
+      org-roam-db-location (concat doom-cache-dir "org-roam.db")
       org-roam-directory (concat org-directory "notes/"))
 #+END_SRC
 
@@ -219,4 +266,14 @@ Show inline images by default
 
 #+BEGIN_SRC emacs-lisp
 (setq org-startup-with-inline-images t)
+#+END_SRC
+* Workarounds
+** TODO Fix for org inline images breaking org-babel
+Issue in [[https://github.com/hlissner/doom-emacs/issues/3185][hlissner/doom-emacs#3185]]
+
+#+BEGIN_SRC emacs-lisp
+(defadvice rc-fix/+org-inline-image-data-fn (_protocol link _description)
+  :override #'+org-inline-image-data-fn
+  "Interpret LINK as base64-encoded image data. Ignore all errors."
+  (with-demoted-errors "%S" (base64-decode-string link)))
 #+END_SRC
