@@ -11,6 +11,10 @@
 
 `autoreconf -if`
 
+- Count the number of files in a directory:
+
+`find {{path/to/directory}} -type f -printf . | wc -c`
+
 - Manage ignore files for a local copy of a git repository:
 
 `git exec $EDITOR .git/info/exclude`
@@ -34,6 +38,10 @@
 - Generate a random string of length n:
 
 `openssl rand -base64 {{n}} | head -c{{n}}`
+
+- Lookup the manpage for a specific version of tmux:
+
+`curl -sSfL https://raw.githubusercontent.com/tmux/tmux/{{2.8}}/tmux.1 | nroff -mdoc | less`
 
 - Shorten a GitHub URL:
 
