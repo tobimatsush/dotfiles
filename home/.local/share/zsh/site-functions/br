@@ -1,7 +1,9 @@
 emulate -L zsh
 
-# XXX: The path might change with https://github.com/Canop/broot/issues/103
-if [[ -f ~/Library/Preferences/org.dystroy.broot/launcher/bash/br ]]; then
-  source ~/Library/Preferences/org.dystroy.broot/launcher/bash/br
-  br "$@"
+if ! command -v broot &> /dev/null; then
+  echo "broot not installed" >&2
+  return 1
 fi
+
+source <(broot --print-shell-function zsh)
+br "$@"
