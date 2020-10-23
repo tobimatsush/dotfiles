@@ -14,8 +14,7 @@ Plug 'easymotion/vim-easymotion', {'on': [
 
 " completion and linting
 Plug 'w0rp/ale'
-Plug 'junegunn/fzf', {'dir': '~/.local/opt/fzf', 'do': '~/.local/libexec/fzf/install'}
-Plug 'junegunn/fzf.vim'
+Plug '/usr/share/doc/fzf/examples' | Plug 'junegunn/fzf.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'neoclide/coc-snippets'
 " XXX: coc-snippets isn't completely compatible w/ UltiSnips snippets
@@ -23,6 +22,7 @@ Plug 'neoclide/coc-snippets'
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 
 " utilities
+Plug 'direnv/direnv.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'machakann/vim-highlightedyank'
 Plug 'RRethy/vim-illuminate'
@@ -381,7 +381,7 @@ let g:EasyMotion_smartcase=1
 let g:EasyMotion_use_migemo=1
 
 " EditorConfig "
-let g:EditorConfig_exclude_patterns=['fugitive://.*', '\(M\|m\|GNUm\)akefile']
+let g:EditorConfig_exclude_patterns=['fugitive://.*']
 
 " UltiSnips "
 let g:UltiSnipsExpandTrigger='<C-x><C-j>'

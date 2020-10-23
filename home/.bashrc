@@ -15,7 +15,6 @@ export PAGER="less"
 export SYSTEMD_LESS="iRSMK"
 
 export GOPATH=~/Documents/src/go
-export ANDROID_HOME=~/.local/opt/android-sdk
 
 # whether to make use of powerline fonts
 export USE_POWERLINE=0
@@ -31,16 +30,16 @@ esac
 ###########################
 #  Environment Variables  #
 ###########################
-export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
 export GPG_TTY="$(tty)"
 
-PATH="$HOME/.local/bin:$PATH"
-PATH+=":$HOME/.cargo/bin"
-PATH+=":$GEM_HOME/bin"
-PATH+=":$(python3 -c 'import site; print(site.getuserbase())')/bin"
-PATH+=":$GOPATH/bin"
-PATH+=":$HOME/.emacs.d/bin"
-export PATH
+export PATH="$(shopt -s nullglob; printf "%s:" \
+  ~/.local/bin \
+  "$PATH" \
+  ~/.cargo/bin \
+  ~/.gem/ruby/*/bin \
+  "$GOPATH/bin" \
+  ~/.emacs.d/bin \
+)"
 
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook bash)"
 

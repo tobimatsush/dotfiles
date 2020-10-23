@@ -35,9 +35,11 @@ source "$DOTFILE_DIR/scripts/setup"
       ~/.vim/autoload/plug.vim
 
 @install Install Git Config
+  - .config/git/attributes
   - .config/git/config
   - .config/git/ignore
   - .config/tig/config
+  - .local/bin/git-delta
   - .local/bin/git-deploy
   - .local/bin/git-fancy
   - .local/bin/git-kitty
@@ -84,8 +86,10 @@ source "$DOTFILE_DIR/scripts/setup"
 @install Install Miscellaneous Config
   - .clang-format
   - .editrc
+  - .gemrc
   - .ideavimrc
   - .config/bat/config
+  - .config/broot/launcher/refused
   - .config/kitty/kitty.conf
   - .config/nano/nanorc
   - .config/nixpkgs/config.nix
@@ -95,7 +99,6 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/zathura/zathurarc
   - .docker/config.json
   - .ipython/profile_default/ipython_config.py
-  - .local/libexec/fzf/install
   - .local/opt/fzftools
   - .local/opt/tmux-copycat
   - .prettierrc
@@ -108,14 +111,16 @@ source "$DOTFILE_DIR/scripts/setup"
 
 @packages
   - init: true
-  - build-essential
-  - cmake
   - cmigemo
+  - direnv
   - fonts-powerline
+  - fzf
   - neovim
   - nodejs
+  - ripgrep
   - zsh-syntax-highlighting
   - shell: nvim +PlugInstall +qall
+  - shell: nvim -c 'CocInstall -sync coc-ultisnips | qall'
   - shell: ~/.emacs.d/bin/doom -y install --no-config
 
 @githooks

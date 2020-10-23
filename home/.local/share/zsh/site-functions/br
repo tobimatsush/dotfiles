@@ -1,6 +1,9 @@
 emulate -L zsh
 
-if [[ -f ~/.config/broot/launcher/bash/br ]]; then
-  source ~/.config/broot/launcher/bash/br
-  br "$@"
+if ! command -v broot &> /dev/null; then
+  echo "broot not installed" >&2
+  return 1
 fi
+
+source <(broot --print-shell-function zsh)
+br "$@"
