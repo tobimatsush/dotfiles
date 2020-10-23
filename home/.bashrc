@@ -14,8 +14,8 @@ export LANG="en_US.UTF-8"
 export LESS="iMR"
 export PAGER="less"
 
+export GTK_PATH=/usr/local/lib/gtk-2.0
 export GOPATH=~/Documents/src/go
-export ANDROID_HOME=/usr/local/share/android-sdk
 
 # whether to make use of powerline fonts
 export USE_POWERLINE=0
@@ -35,19 +35,25 @@ esac
 #  Environment Variables  #
 ###########################
 export CLICOLOR=1
-export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
 export GPG_TTY="$(tty)"
 
-PATH="$HOME/.local/bin:/usr/local/opt/python/libexec/bin:/usr/local/sbin:$PATH"
-PATH+=":$HOME/.cargo/bin"
-PATH+=":$GEM_HOME/bin"
-PATH+=":$(python3 -c 'import site; print(site.getuserbase())')/bin"
-PATH+=":$GOPATH/bin"
-PATH+=":$HOME/.emacs.d/bin"
-export PATH
+export PATH="$(shopt -s nullglob; printf "%s:" \
+  ~/.local/bin \
+  /usr/local/opt/python/libexec/bin \
+  /usr/local/sbin \
+  "$PATH" \
+  ~/.cargo/bin \
+  ~/Library/Python/*/bin \
+  ~/.gem/ruby/*/bin \
+  "$GOPATH/bin" \
+  ~/.emacs.d/bin \
+)"
 
 if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
   source ~/.nix-profile/etc/profile.d/nix.sh
+fi
+if [[ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]]; then
+  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
 fi
 
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook bash)"
