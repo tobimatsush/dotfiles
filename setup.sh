@@ -87,7 +87,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/bat/config
   - .config/broot/launcher/refused
   - .config/kitty/kitty.conf
-  - .config/alacritty/alacritty.conf
+  - .config/alacritty/alacritty.yml
   - .config/nixpkgs/config.nix
   - .config/ranger/rc.conf
   - .config/ranger/scope.sh
