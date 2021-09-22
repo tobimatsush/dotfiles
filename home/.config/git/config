@@ -1,7 +1,7 @@
 [user]
 	name = tobimatsush
 	email = tobimatsush@gmail.com
-        signingkey = 0x8ABC1E9EB3BF5295
+	signingkey = 0x8ABC1E9EB3BF5295
 [commit]
 	gpgsign = true
 [diff]
