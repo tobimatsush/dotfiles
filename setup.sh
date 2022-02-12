@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2215
 
 DOTFILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILE_FILES_DIR=home/files
+
+# shellcheck source=scripts/setup
 source "$DOTFILE_DIR/scripts/setup"
 
 # Remove dead symlinks
@@ -8,7 +12,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - gc: true
 
 @shell Update Submodules
-  - git submodule --quiet update --init --remote
+  - git submodule --quiet update --init
 
 @install Install Shell Config
   - .bash_profile
@@ -21,8 +25,6 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/shell/snippets/osx
   - .config/shell/snippets/main/common.md
   - .config/shell/snippets/main/osx.md
-  - .config/shell/templates
-  - .config/shell/templates.csv
   - .local/share/zsh/site-functions
   - .local/opt/tldr
 
@@ -38,9 +40,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/git/config
   - .config/git/ignore
   - .config/tig/config
-  - .local/bin/git-delta
   - .local/bin/git-deploy
-  - .local/bin/git-fancy
   - .local/bin/git-kitty
 
 @install Install GPG Config
@@ -48,7 +48,6 @@ source "$DOTFILE_DIR/scripts/setup"
   - chmod: 700 .gnupg
   - chmod: 600 .gnupg/gpg.conf
   - chmod: 600 .gnupg/gpg-agent.conf
-  - .gnupg/gpg.conf
   - .gnupg/gpg-agent.conf
   - Library/LaunchAgents/org.gnupg.gpg-agent.plist
 
@@ -70,7 +69,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .local/bin/uplatexmk
 
 @install Install Emacs Config
-  - github: hlissner/doom-emacs ~/.emacs.d
+  - github: hlissner/doom-emacs ~/.config/emacs
   - .config/doom/init.el
   - .config/doom/config.org
   - .config/doom/packages.el
@@ -86,41 +85,31 @@ source "$DOTFILE_DIR/scripts/setup"
   - .ideavimrc
   - .config/bat/config
   - .config/broot/launcher/refused
+  - .config/containers/containers.conf
   - .config/kitty/kitty.conf
   - .config/alacritty/alacritty.yml
   - .config/nixpkgs/config.nix
   - .config/ranger/rc.conf
   - .config/ranger/scope.sh
+  - .config/tmux/tmux.conf
   - .config/zathura/zathurarc
-  - .docker/config.json
   - .ipython/profile_default/ipython_config.py
-  - .local/bin/rmpkg
   - .local/bin/imgcat
-  - .local/opt/fzftools
-  - .local/opt/tmux-copycat
+  - .local/bin/uninstaller
   - .nanorc
   - .prettierrc
   - .screenrc
-  - .tmux.conf
   - .wgetrc
   - Library/Application\ Support/AquaSKK/keymap.conf
+  - Library/Application\ Support/iTerm2/DynamicProfiles/template.plist
+  - Library/Developer/Xcode/UserData/IDETemplateMacros.plist
 
 # The below will not run unless --init is specified
 
-@packages
+@shell Install Packages
   - init: true
-  - cmigemo
-  - direnv
-  - fzf
-  - neovim
-  - nodejs
-  - ripgrep
-  - zsh-completions
-  - zsh-syntax-highlighting
-  - cask: homebrew/cask-fonts/font-powerline-symbols
-  - shell: nvim +PlugInstall +qall
-  - shell: nvim -c 'CocInstall -sync coc-ultisnips | qall'
-  - shell: ~/.emacs.d/bin/doom -y install --no-config
+  - nvim --headless +PlugInstall +'%print' +qall
+  - ~/.config/emacs/bin/doom -y install --no-config
 
 @githooks
   - init: true
