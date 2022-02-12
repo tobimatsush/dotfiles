@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2215
 
 DOTFILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILE_FILES_DIR=home/files
+
+# shellcheck source=scripts/setup
 source "$DOTFILE_DIR/scripts/setup"
 
 # Remove dead symlinks
@@ -8,7 +12,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - gc: true
 
 @shell Update Submodules
-  - git submodule --quiet update --init --remote
+  - git submodule --quiet update --init
 
 @install Install Shell Config
   - .bash_profile
@@ -22,8 +26,6 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/shell/snippets/linux
   - .config/shell/snippets/main/common.md
   - .config/shell/snippets/main/linux.md
-  - .config/shell/templates
-  - .config/shell/templates.csv
   - .local/share/zsh/site-functions
   - .local/opt/tldr
 
@@ -39,9 +41,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .config/git/config
   - .config/git/ignore
   - .config/tig/config
-  - .local/bin/git-delta
   - .local/bin/git-deploy
-  - .local/bin/git-fancy
   - .local/bin/git-kitty
 
 @install Install GPG Config
@@ -49,7 +49,6 @@ source "$DOTFILE_DIR/scripts/setup"
   - chmod: 700 .gnupg
   - chmod: 600 .gnupg/gpg.conf
   - chmod: 600 .gnupg/gpg-agent.conf
-  - .gnupg/gpg.conf
   - .gnupg/gpg-agent.conf
 
 @install Install SSH Config
@@ -66,7 +65,6 @@ source "$DOTFILE_DIR/scripts/setup"
   - .gdbinit
   - .local/bin/gef
   - .local/bin/peda
-  - .local/bin/pwndbg
 
 @install Install LaTeX Config
   - .config/latexmk/latexmkrc
@@ -74,7 +72,7 @@ source "$DOTFILE_DIR/scripts/setup"
   - .local/bin/uplatexmk
 
 @install Install Emacs Config
-  - github: hlissner/doom-emacs ~/.emacs.d
+  - github: hlissner/doom-emacs ~/.config/emacs
   - .config/doom/init.el
   - .config/doom/config.org
   - .config/doom/packages.el
@@ -90,39 +88,28 @@ source "$DOTFILE_DIR/scripts/setup"
   - .ideavimrc
   - .config/bat/config
   - .config/broot/launcher/refused
+  - .config/containers/containers.conf
   - .config/kitty/kitty.conf
   - .config/alacritty/alacritty.yml
   - .config/nano/nanorc
   - .config/nixpkgs/config.nix
   - .config/ranger/rc.conf
   - .config/ranger/scope.sh
-  - .config/tilix/schemes/gruvbox-dark.json
+  - .config/tmux/tmux.conf
   - .config/zathura/zathurarc
-  - .docker/config.json
   - .ipython/profile_default/ipython_config.py
-  - .local/opt/fzftools
-  - .local/opt/tmux-copycat
   - .prettierrc
   - .screenrc
-  - .tmux.conf
   - .wgetrc
   - .xprofile
+  - .Xresources
 
 # The below will not run unless --init is specified
 
-@packages
+@shell Install Packages
   - init: true
-  - cmigemo
-  - direnv
-  - fonts-powerline
-  - fzf
-  - neovim
-  - nodejs
-  - ripgrep
-  - zsh-syntax-highlighting
-  - shell: nvim +PlugInstall +qall
-  - shell: nvim -c 'CocInstall -sync coc-ultisnips | qall'
-  - shell: ~/.emacs.d/bin/doom -y install --no-config
+  - nvim --headless +PlugInstall +'%print' +qall
+  - ~/.config/emacs/bin/doom -y install --no-config
 
 @githooks
   - init: true

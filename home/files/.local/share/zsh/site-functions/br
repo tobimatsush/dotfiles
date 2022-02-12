@@ -1,0 +1,10 @@
+emulate -L zsh
+zmodload -i zsh/parameter
+
+if ! (( $+commands[broot] )); then
+  echo "broot not installed" >&2
+  return 1
+fi
+
+source <(broot --print-shell-function zsh)
+br "$@"
